@@ -4,7 +4,7 @@ import { launchPicker, waitTabComplete } from '../utils/picker-launch';
 import { DEFAULT_SETTINGS, getSettings, getSites, mutateSites, saveSettings, updateSite } from '../utils/storage';
 import { computeNextRun, describeSchedule, formatDateTime, formatHM, isValidHM, weekdayShort } from '../utils/time';
 import { mountTimePicker, type TimePicker } from '../utils/timepicker';
-import { clear, h, hostOf, renderHistory, statusInfo } from '../utils/ui';
+import { clear, h, hostOf, renderHistory, siteLink, statusInfo } from '../utils/ui';
 import type { HourFormatPref, LanguagePref, Schedule, Settings, Site, TestSelectorResponse } from '../utils/types';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -36,10 +36,10 @@ async function renderSites(): Promise<void> {
     const permOk = await hasHostPermission(s.url).catch(() => false);
     cards.push(h('div', { class: `card site${s.enabled ? '' : ' paused'}` },
       h('div', { class: 'row' },
-        h('span', { class: 'title' }, s.name || hostOf(s.url)),
+        h('span', { class: 'title' }, siteLink(s, t, s.name || hostOf(s.url))),
         h('span', { class: `badge ${st.cls}` }, st.label),
         s.unseen ? h('span', { class: 'badge changed' }, t('badgeNew')) : null),
-      h('div', { class: 'muted url' }, s.url + (s.selector ? `  ·  ${s.selector}` : '')),
+      h('div', { class: 'muted url' }, siteLink(s, t, s.url), s.selector ? `  ·  ${s.selector}` : ''),
       h('div', { class: 'grid muted' },
         h('span', {}, t('ruleLabel')), h('span', {}, describeSchedule(s.schedule, t, I.fmt)),
         h('span', {}, t('nextLabel')), h('span', {}, s.enabled ? formatDateTime(s.nextRun, I.fmt) : t('paused')),

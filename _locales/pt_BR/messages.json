@@ -3,7 +3,7 @@
     "message": "Fofu Watcher"
   },
   "extDescription": {
-    "message": "Monitora sites e avisa quando o conteúdo mudar. Tudo local, sem telemetria."
+    "message": "Monitora sites e avisa quando o conteúdo mudar. Tudo local, sem telemetria. By Cadu Fodão."
   },
   "and": {
     "message": "e"
@@ -16,6 +16,12 @@
   },
   "viewChanges": {
     "message": "Ver mudanças"
+  },
+  "openSite": {
+    "message": "Abrir página"
+  },
+  "openSiteTitle": {
+    "message": "Abrir {url} em uma nova aba"
   },
   "checkNow": {
     "message": "Verificar agora"

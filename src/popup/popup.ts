@@ -2,7 +2,8 @@ import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
 import { launchPicker } from '../utils/picker-launch';
 import { getSites } from '../utils/storage';
 import { formatDateTime } from '../utils/time';
-import { clear, diffUrl, h, hostOf, statusInfo } from '../utils/ui';
+import { clear, diffUrl, h, hostOf, siteLink, statusInfo } from '../utils/ui';
+import { isHttpUrl } from '../utils/url';
 import type { Site } from '../utils/types';
 
 const list = document.getElementById('list')!;
@@ -24,7 +25,7 @@ function card(s: Site): HTMLElement {
 
   return h('div', { class: 'card site' },
     h('div', { class: 'row' },
-      h('div', { class: 'title spacer', title: s.url }, s.name || hostOf(s.url)),
+      h('div', { class: 'title spacer' }, siteLink(s, t, s.name || hostOf(s.url))),
       h('span', { class: `badge ${st.cls}` }, st.label)),
     h('div', { class: 'meta muted' },
       h('span', {}, t('lastLabel')), h('span', {}, formatDateTime(s.lastCheck, fmt)),
@@ -32,6 +33,7 @@ function card(s: Site): HTMLElement {
     s.status === 'error' && s.lastError ? h('div', { class: 'err' }, t('errorWithCount', { error: errorText(t, s.lastError), count: s.failures })) : null,
     h('div', { class: 'actions' },
       btn,
+      isHttpUrl(s.url) ? h('button', { class: 'small', title: t('openSiteTitle', { url: s.url }), onclick: () => chrome.tabs.create({ url: s.url }) }, `${t('openSite')} ↗`) : null,
       s.history.length ? h('button', { class: 'small', onclick: () => chrome.tabs.create({ url: diffUrl(s.id) }) }, t('viewChanges')) : null),
   );
 }

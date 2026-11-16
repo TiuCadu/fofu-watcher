@@ -17,6 +17,12 @@
   "viewChanges": {
     "message": "View changes"
   },
+  "openSite": {
+    "message": "Open page"
+  },
+  "openSiteTitle": {
+    "message": "Open {url} in a new tab"
+  },
   "checkNow": {
     "message": "Check now"
   },

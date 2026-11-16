@@ -36,7 +36,7 @@ npm test          # só os testes
 npm run check     # typecheck + testes + build (rode a cada alteração)
 ```
 
-- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
+- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
 - Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", normalização de texto, ignorar voláteis e diff por linhas; **idioma e hora**: formatação 12h/24h com `Intl`, conversão 12h↔24h (ida e volta nos 1440 minutos do dia), resolução automática de idioma/formato, tradutor, **seletor visual** (para todo elemento de uma página de exemplo, o seletor gerado acha exatamente aquele elemento; ids/classes gerados automaticamente são ignorados) e **paridade dos dicionários** (mesmas chaves e parâmetros em pt-BR e en-US, nenhuma chave usada no código sem tradução).
 - Código que depende de `chrome.*` não é testado unitariamente; por isso a lógica pura fica em `src/utils/`.
 - **Fluxo para bugs:** escrever um teste `regressão: …` que falha → corrigir → teste passa → registrar no [CHANGELOG](CHANGELOG.md). Assim cada bug fica rastreável.
@@ -45,6 +45,7 @@ npm run check     # typecheck + testes + build (rode a cada alteração)
 
 - **Adicionar uma página aberta:** clique no ícone → **+ Adicionar esta página** (a URL e o título já vêm preenchidos).
 - **Adicionar manualmente:** ícone → ⚙ → **Adicionar site**.
+- **Ir para a página monitorada:** no popup e na lista de sites, o nome do site é um link (e há o botão **Abrir página ↗** no popup); clique para abrir a página numa nova aba.
 - **Monitorar só uma parte da página:** veja “Escolher a parte da página” abaixo.
 - Ao salvar, o navegador pede permissão de acesso **apenas àquele site** (`optional_host_permissions`).
 - A primeira verificação só guarda a versão base, sem notificar.

@@ -1,7 +1,20 @@
 import { formatDateTime, type TimeFormat, type Translate } from './time';
 import type { DiffLine, HistoryEntry, Site } from './types';
+import { isHttpUrl } from './url';
 
 type Child = Node | string | null | false | undefined;
+
+export function siteLink(site: Site, t: Translate, text: string): Node | string {
+  if (!isHttpUrl(site.url)) return text;
+  const a = document.createElement('a');
+  a.href = site.url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.title = t('openSiteTitle', { url: site.url });
+  a.className = 'site-link';
+  a.textContent = text;
+  return a;
+}
 
 export function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,

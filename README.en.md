@@ -36,7 +36,7 @@ npm test          # tests only
 npm run check     # typecheck + tests + build (run after every change)
 ```
 
-- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
+- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation) and `test/url.test.ts` (clickable links: http/https only). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
 - Coverage: schedule (fixed times, weekdays, interval, window, window crossing midnight), "Do not disturb", text normalization, volatile-content filtering and line diff; **language and time**: 12h/24h formatting with `Intl`, 12h↔24h conversion (round trip over all 1440 minutes of the day), automatic language/format resolution, translator, **visual picker** (for every element of a sample page, the generated selector finds exactly that element; auto-generated ids/classes are ignored) and **dictionary parity** (same keys and parameters in pt-BR and en-US, no key used in code without a translation).
 - Code that depends on `chrome.*` is not unit-tested, so pure logic lives in `src/utils/`.
 - **Bug workflow:** write a failing `regressão: …` test → fix → test passes → log it in the [CHANGELOG](CHANGELOG.md), so every bug stays traceable.
@@ -45,6 +45,7 @@ npm run check     # typecheck + tests + build (run after every change)
 
 - **Add the open page:** click the icon → **+ Add this page** (URL and title come pre-filled).
 - **Add manually:** icon → ⚙ → **Add site**.
+- **Go to the monitored page:** in the popup and in the site list, the site name is a link (the popup also has an **Open page ↗** button); click to open the page in a new tab.
 - **Monitor only part of a page:** see “Pick the part of the page” below.
 - When saving, the browser asks for access **to that site only** (`optional_host_permissions`).
 - The first check only stores the baseline version, without notifying.

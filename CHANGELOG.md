@@ -2,6 +2,13 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.3.0] — Link para a página monitorada
+### Adicionado
+- O nome do site no popup e na lista de sites (opções) agora é um **link clicável** que abre a página monitorada numa nova aba; na lista de opções a URL também é link.
+- Botão **Abrir página ↗** em cada site do popup.
+- Só URLs http/https viram link (`isHttpUrl` em `src/utils/url.ts`); os links usam `rel="noopener noreferrer"`.
+- Textos nos dois idiomas (`openSite`, `openSiteTitle`) e `test/url.test.ts`.
+
 ## [1.2.0] — Seletor visual (sem precisar saber CSS)
 ### Adicionado
 - **◎ Escolher parte da página** no popup: injeta um seletor visual na aba atual (destaca o elemento sob o mouse; clique escolhe, ↑ escolhe o pai, Esc cancela). O formulário abre já preenchido.
