@@ -487,5 +487,20 @@
   },
   "errTabRead": {
     "message": "não foi possível ler a página aberta ({message})"
+  },
+  "fClickBefore": {
+    "message": "Antes de ler, clicar no botão com o texto (opcional)"
+  },
+  "fClickBeforePh": {
+    "message": "ex.: Sim, Aceitar"
+  },
+  "fClickBeforeHint": {
+    "message": "Para avisos que escondem o conteúdo, como “Você é maior de 18 anos? Sim / Não” ou banners de cookies. Escreva o texto exato do botão; a extensão clica nele uma vez antes de ler. Se o botão não aparecer, lê normalmente."
+  },
+  "readModeClick": {
+    "message": "clicando em “{text}” antes de ler"
+  },
+  "saving": {
+    "message": "Salvando…"
   }
 }

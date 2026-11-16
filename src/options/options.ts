@@ -1,6 +1,7 @@
 import { describeCheckResult, type CheckMessage } from '../utils/check-result';
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
 import { deleteHistory, sitesWithHistory } from '../utils/history';
+import { upsertSite } from '../utils/site-list';
 import { hasHostPermission, originPattern } from '../utils/permissions';
 import { launchPicker, waitTabComplete } from '../utils/picker-launch';
 import { DEFAULT_SETTINGS, getSettings, getSites, mutateSites, saveSettings, updateSite } from '../utils/storage';
@@ -55,7 +56,8 @@ async function renderSites(): Promise<void> {
         h('span', { class: 'title' }, siteLink(s, t, s.name || hostOf(s.url))),
         h('span', { class: `badge ${st.cls}` }, st.label),
         s.unseen ? h('span', { class: 'badge changed' }, t('badgeNew')) : null),
-      h('div', { class: 'muted url' }, siteLink(s, t, s.url), s.selector ? `  ·  ${s.selector}` : '', s.readMode === 'tab' ? `  ·  ${t('readModeTab')}` : ''),
+      h('div', { class: 'muted url' }, siteLink(s, t, s.url), s.selector ? `  ·  ${s.selector}` : '', s.readMode === 'tab' ? `  ·  ${t('readModeTab')}` : '',
+        s.readMode === 'tab' && s.clickBefore ? `  ·  ${t('readModeClick', { text: s.clickBefore })}` : ''),
       h('div', { class: 'grid muted' },
         h('span', {}, t('ruleLabel')), h('span', {}, describeSchedule(s.schedule, t, I.fmt)),
         h('span', {}, t('nextLabel')), h('span', {}, s.enabled ? formatDateTime(s.nextRun, I.fmt) : t('paused')),
@@ -97,6 +99,7 @@ async function remove(s: Site): Promise<void> {
 const dlg = $<HTMLDialogElement>('dlg');
 const form = $<HTMLFormElement>('form');
 let editing: Site | null = null;
+let draftId = '';
 let times: string[] = []; 
 
 const daysBox = $('days');
@@ -144,6 +147,7 @@ const setDlgTitle = () => { $('dlg-title').textContent = t(editing ? 'formEditTi
 
 function openForm(site?: Site, preset?: { url?: string; name?: string; selector?: string; preview?: string }): void {
   editing = site ?? null;
+  draftId = site?.id ?? crypto.randomUUID();
   setDlgTitle();
   $('form-error').textContent = '';
   $<HTMLInputElement>('f-url').value = site?.url ?? preset?.url ?? '';
@@ -153,6 +157,8 @@ function openForm(site?: Site, preset?: { url?: string; name?: string; selector?
   updateSelectorUi();
   $<HTMLInputElement>('f-ignore').checked = site?.ignoreVolatile ?? true;
   $<HTMLInputElement>('f-tab').checked = site?.readMode === 'tab';
+  $<HTMLInputElement>('f-click').value = site?.clickBefore ?? '';
+  updateClickBox();
 
   const sc = site?.schedule;
   form.querySelector<HTMLInputElement>(`input[name="mode"][value="${sc?.mode ?? 'fixed'}"]`)!.checked = true;
@@ -207,8 +213,11 @@ function readUrl(): string | null {
 }
 
 const askTest = (url: string): Promise<TestSelectorResponse> =>
-  chrome.runtime.sendMessage({ type: 'testSelector', url, selector: selInput().value.trim(), ignoreVolatile: $<HTMLInputElement>('f-ignore').checked, readMode: readModeInput() });
+  chrome.runtime.sendMessage({ type: 'testSelector', url, selector: selInput().value.trim(), ignoreVolatile: $<HTMLInputElement>('f-ignore').checked, readMode: readModeInput(), clickBefore: clickInput() });
 const readModeInput = (): ReadMode => ($<HTMLInputElement>('f-tab').checked ? 'tab' : 'fetch');
+const clickInput = (): string => (readModeInput() === 'tab' ? $<HTMLInputElement>('f-click').value.trim().slice(0, 80) : '');
+function updateClickBox(): void { $('click-box').classList.toggle('hidden', readModeInput() !== 'tab'); }
+$('f-tab').addEventListener('change', updateClickBox);
 const testErrorText = (e: ErrorInfo | string) => (typeof e !== 'string' && e.key === 'errLoginRequired' && readModeInput() === 'fetch'
   ? t('errLoginRequiredHint', e.params ?? {})
   : t('selTestFail', { error: errorText(t, e) }));
@@ -236,8 +245,22 @@ $('btn-pick').addEventListener('click', async () => {
   if (!(await launchPicker(tab.id!, t, editing?.id))) showSelPreview(t('pickerUnavailable'), true);
 });
 
+let saving = false;
 form.addEventListener('submit', async (ev) => {
   ev.preventDefault();
+  if (saving) return;
+  saving = true;
+  const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  btn.disabled = true;
+  btn.textContent = t('saving');
+  try { await saveForm(); } finally {
+    saving = false;
+    btn.disabled = false;
+    btn.textContent = t('save');
+  }
+});
+
+async function saveForm(): Promise<void> {
   const err = $('form-error');
   err.textContent = '';
 
@@ -257,8 +280,10 @@ form.addEventListener('submit', async (ev) => {
   const name = $<HTMLInputElement>('f-name').value.trim();
   const ignoreVolatile = $<HTMLInputElement>('f-ignore').checked;
   const readMode = readModeInput();
+  const clickBefore = clickInput();
 
-  if (selector && (!editing || editing.url !== url || editing.selector !== selector || (editing.readMode ?? 'fetch') !== readMode)) {
+  if (selector && (!editing || editing.url !== url || editing.selector !== selector || (editing.readMode ?? 'fetch') !== readMode
+    || (editing.clickBefore ?? '') !== clickBefore)) {
     const r = await askTest(url);
     const problem = !r.ok ? errorText(t, r.error) : !r.text.trim() ? t('selTestEmpty') : null;
     if (problem && !confirm(t('warnSelector', { error: problem }))) return;
@@ -266,15 +291,16 @@ form.addEventListener('submit', async (ev) => {
 
   if (editing) {
     await updateSite(editing.id, (s) => {
-      const rebase = s.url !== url || s.selector !== selector || s.ignoreVolatile !== ignoreVolatile || (s.readMode ?? 'fetch') !== readMode;
-      Object.assign(s, { url, name, selector, ignoreVolatile, readMode, schedule });
+      const rebase = s.url !== url || s.selector !== selector || s.ignoreVolatile !== ignoreVolatile || (s.readMode ?? 'fetch') !== readMode
+        || (s.clickBefore ?? '') !== clickBefore;
+      Object.assign(s, { url, name, selector, ignoreVolatile, readMode, clickBefore, schedule });
       if (rebase) Object.assign(s, { baseText: null, baseHash: null, status: 'pending', unseen: false, failures: 0, lastError: null, nextRun: Date.now() });
       else s.nextRun = computeNextRun(schedule, new Date());
     });
   } else {
     await mutateSites((sites) => {
-      sites.push({
-        id: crypto.randomUUID(), url, name, selector, ignoreVolatile, readMode, enabled: true, schedule,
+      upsertSite(sites, {
+        id: draftId, url, name, selector, ignoreVolatile, readMode, clickBefore, enabled: true, schedule,
         nextRun: Date.now(), 
         lastCheck: null, status: 'pending', unseen: false, failures: 0, lastError: null,
         baseText: null, baseHash: null, history: [],
@@ -283,7 +309,7 @@ form.addEventListener('submit', async (ev) => {
   }
   dlg.close();
   void chrome.runtime.sendMessage({ type: 'checkDue' });
-});
+}
 
 const histSelected = new Set<number>();
 let histShown: Site | undefined;
@@ -414,7 +440,8 @@ function sanitizeSite(raw: Partial<Site>): Site | null {
     return {
       id: typeof raw.id === 'string' && raw.id ? raw.id : crypto.randomUUID(),
       url: raw.url, name: String(raw.name ?? ''), selector: String(raw.selector ?? ''),
-      ignoreVolatile: raw.ignoreVolatile !== false, readMode: raw.readMode === 'tab' ? 'tab' : 'fetch', enabled: raw.enabled !== false, schedule,
+      ignoreVolatile: raw.ignoreVolatile !== false, readMode: raw.readMode === 'tab' ? 'tab' : 'fetch',
+      clickBefore: raw.readMode === 'tab' ? String(raw.clickBefore ?? '').trim().slice(0, 80) : '', enabled: raw.enabled !== false, schedule,
       nextRun: Date.now(), lastCheck: raw.lastCheck ?? null,
       status: raw.baseHash ? 'ok' : 'pending', unseen: false, failures: 0, lastError: null,
       baseText: raw.baseText ?? null, baseHash: raw.baseHash ?? null,

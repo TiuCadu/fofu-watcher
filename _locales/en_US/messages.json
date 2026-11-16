@@ -487,5 +487,20 @@
   },
   "errTabRead": {
     "message": "could not read the opened page ({message})"
+  },
+  "fClickBefore": {
+    "message": "Before reading, click the button with the text (optional)"
+  },
+  "fClickBeforePh": {
+    "message": "e.g. Yes, Accept"
+  },
+  "fClickBeforeHint": {
+    "message": "For notices that hide the content, such as “Are you over 18? Yes / No” or cookie banners. Type the exact button text; the extension clicks it once before reading. If the button does not appear, it reads normally."
+  },
+  "readModeClick": {
+    "message": "clicking “{text}” before reading"
+  },
+  "saving": {
+    "message": "Saving…"
   }
 }

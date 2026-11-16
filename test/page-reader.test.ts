@@ -65,4 +65,61 @@ await t('seletor inválido: errSelectorInvalid', async () => {
   assert.equal(!r.ok && r.key, 'errSelectorInvalid');
 });
 
+type Btn = { innerText: string; value?: string; click(): void; getBoundingClientRect?: () => { width: number; height: number } };
+function gatePage(opts: { buttons: (click: () => void) => Btn[]; productAfterClick?: boolean; productFromStart?: boolean }) {
+  const state = { clicks: 0 };
+  const onClick = () => { state.clicks++; };
+  const buttons = opts.buttons(onClick);
+  const product = () => opts.productFromStart || (opts.productAfterClick && state.clicks > 0);
+  (globalThis as any).location = { href: 'https://loja.com/produto' };
+  (globalThis as any).document = {
+    get body() { return { innerText: product() ? 'Produto R$ 99' : 'Atenção Você é maior de 18 anos? Sim Não' }; },
+    querySelectorAll(sel: string) {
+      if (sel === '.preco') return product() ? [{ innerText: 'R$ 99' }] : [];
+      if (sel.includes('button') || sel === 'body *') return product() ? [] : buttons;
+      return [];
+    },
+  };
+  return state;
+}
+const btn = (innerText: string, click: () => void, size = 30): Btn => ({ innerText, click, getBoundingClientRect: () => ({ width: size, height: size }) });
+
+await t('regressão: aviso de idade — clica em "Sim" e então lê o preço que só aparece depois', async () => {
+  const st = gatePage({ buttons: (c) => [btn('Não', () => {}), btn('Sim', c)], productAfterClick: true });
+  const r = await readRenderedText('.preco', 300, 1, 'Sim');
+  assert.deepEqual(r, { ok: true, text: 'R$ 99', url: 'https://loja.com/produto' });
+  assert.equal(st.clicks, 1, 'clica uma única vez');
+});
+await t('sem "clicar antes", o aviso esconde o preço (errSelectorNotFound) — o problema original', async () => {
+  gatePage({ buttons: (c) => [btn('Sim', c)], productAfterClick: true });
+  const r = await readRenderedText('.preco', 60, 1);
+  assert.equal(!r.ok && r.key, 'errSelectorNotFound');
+});
+await t('texto do botão ignora maiúsculas e espaços; não clica em "Não" nem em botões invisíveis', async () => {
+  let wrong = 0;
+  const st = gatePage({ buttons: (c) => [btn('  SIM ', () => { wrong++; }, 0), btn('Não', () => { wrong++; }), btn('  sim\n', c)], productAfterClick: true });
+  const r = await readRenderedText('.preco', 300, 1, 'Sim');
+  assert.ok(r.ok);
+  assert.equal(st.clicks, 1);
+  assert.equal(wrong, 0, 'não clicou no invisível nem no "Não"');
+});
+await t('botão com value (input type=button) também é encontrado', async () => {
+  const st = gatePage({ buttons: (c) => [{ innerText: '', value: 'Aceitar', click: c }], productAfterClick: true });
+  assert.ok((await readRenderedText('.preco', 300, 1, 'Aceitar')).ok);
+  assert.equal(st.clicks, 1);
+});
+await t('se o site já lembrou a resposta (trecho na tela, sem aviso), lê sem esperar o botão', async () => {
+  const st = gatePage({ buttons: () => [], productFromStart: true });
+  const t0 = Date.now();
+  const r = await readRenderedText('.preco', 2000, 1, 'Sim');
+  assert.ok(r.ok && r.text === 'R$ 99');
+  assert.equal(st.clicks, 0);
+  assert.ok(Date.now() - t0 < 1000, 'não esperou os 2 s do botão');
+});
+await t('botão que nunca aparece não vira erro: segue lendo (página inteira)', async () => {
+  gatePage({ buttons: () => [], productFromStart: true });
+  const r = await readRenderedText('', 50, 1, 'Sim');
+  assert.ok(r.ok && r.text === 'Produto R$ 99');
+});
+
 console.log(`${n} testes do modo "ler abrindo a página" passaram.`);

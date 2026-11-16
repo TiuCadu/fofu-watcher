@@ -36,6 +36,7 @@ export interface Site {
   selector: string;
   ignoreVolatile: boolean;
   readMode?: ReadMode;
+  clickBefore?: string;
   enabled: boolean;
   schedule: Schedule;
   nextRun: number | null;
@@ -78,7 +79,7 @@ export interface PickerContext {
 export type BgMessage =
   | { type: 'checkNow'; id: string }
   | { type: 'checkDue' }
-  | { type: 'testSelector'; url: string; selector: string; ignoreVolatile: boolean; readMode: ReadMode }
+  | { type: 'testSelector'; url: string; selector: string; ignoreVolatile: boolean; readMode: ReadMode; clickBefore: string }
   | { type: 'pickerResult'; selector: string; preview: string; url: string; title: string; editId?: string };
 
 export type CheckOutcome = 'baseline' | 'unchanged' | 'changed' | 'error';

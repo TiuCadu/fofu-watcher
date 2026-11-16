@@ -60,7 +60,7 @@ async function extractText(html: string, site: Pick<Site, 'selector' | 'ignoreVo
   return normalizeText(res.text, site.ignoreVolatile);
 }
 
-async function readViaTab(site: Pick<Site, 'url' | 'selector'>): Promise<string> {
+async function readViaTab(site: Pick<Site, 'url' | 'selector' | 'clickBefore'>): Promise<string> {
   if (!(await hasHostPermission(site.url))) throw new CheckError({ key: 'errNoPermission' });
   const win = await chrome.windows.create({ url: site.url, focused: false, state: 'minimized' })
     .catch(() => chrome.windows.create({ url: site.url, focused: false })); 
@@ -70,7 +70,7 @@ async function readViaTab(site: Pick<Site, 'url' | 'selector'>): Promise<string>
     await waitTabComplete(tabId, TAB_LOAD_TIMEOUT_MS);
     let res: RenderedRead | undefined;
     try {
-      [{ result: res }] = await chrome.scripting.executeScript({ target: { tabId }, func: readRenderedText, args: [site.selector, TAB_SETTLE_MS, 700] });
+      [{ result: res }] = await chrome.scripting.executeScript({ target: { tabId }, func: readRenderedText, args: [site.selector, TAB_SETTLE_MS, 700, site.clickBefore ?? ''] });
     } catch (e) {
       const final = (await chrome.tabs.get(tabId).catch(() => undefined))?.url;
       if (final && isLoginRedirect(site.url, final)) throw new CheckError({ key: 'errLoginRequired', params: { url: shortUrl(final) } });
@@ -85,14 +85,14 @@ async function readViaTab(site: Pick<Site, 'url' | 'selector'>): Promise<string>
   }
 }
 
-async function readSite(site: Pick<Site, 'url' | 'selector' | 'ignoreVolatile' | 'readMode'>): Promise<string> {
+async function readSite(site: Pick<Site, 'url' | 'selector' | 'ignoreVolatile' | 'readMode' | 'clickBefore'>): Promise<string> {
   if (site.readMode === 'tab') return normalizeText(await readViaTab(site), site.ignoreVolatile);
   return extractText(await fetchHtml(site), site);
 }
 
-export async function testSelector(url: string, selector: string, ignoreVolatile: boolean, readMode: ReadMode = 'fetch'): Promise<TestSelectorResponse> {
+export async function testSelector(url: string, selector: string, ignoreVolatile: boolean, readMode: ReadMode = 'fetch', clickBefore = ''): Promise<TestSelectorResponse> {
   try {
-    const text = await readSite({ url, selector, ignoreVolatile, readMode });
+    const text = await readSite({ url, selector, ignoreVolatile, readMode, clickBefore });
     return { ok: true, text };
   } catch (e) {
     return { ok: false, error: e instanceof CheckError ? e.info : { key: 'errUnexpected', params: { message: (e as Error).message } } };

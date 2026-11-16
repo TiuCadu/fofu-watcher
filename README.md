@@ -36,7 +36,7 @@ npm test          # só os testes
 npm run check     # typecheck + testes + build (rode a cada alteração)
 ```
 
-- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https), `test/history.test.ts` (quais sites aparecem no histórico e exclusão de mudanças), `test/scheduling.test.ts` (simulação do tick de 1 minuto: o intervalo não atrasa; cliques durante uma verificação), `test/page-reader.test.ts` (modo "Ler abrindo a página": detecção de login/verificação e leitura do conteúdo montado), `test/options-tab.test.ts` (reaproveitar a aba de opções), `test/check-result.test.ts` (mensagem do "Verificar agora") e `test/regressions.test.ts` (regressões em código com `chrome.*`, por varredura do código-fonte). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
+- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https), `test/history.test.ts` (quais sites aparecem no histórico e exclusão de mudanças), `test/scheduling.test.ts` (simulação do tick de 1 minuto: o intervalo não atrasa; cliques durante uma verificação), `test/page-reader.test.ts` (modo "Ler abrindo a página": detecção de login/verificação, leitura do conteúdo montado e "clicar antes de ler"), `test/options-tab.test.ts` (reaproveitar a aba de opções), `test/site-list.test.ts` (salvar várias vezes não duplica), `test/check-result.test.ts` (mensagem do "Verificar agora") e `test/regressions.test.ts` (regressões em código com `chrome.*`, por varredura do código-fonte). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
 - Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", normalização de texto, ignorar voláteis e diff por linhas; **idioma e hora**: formatação 12h/24h com `Intl`, conversão 12h↔24h (ida e volta nos 1440 minutos do dia), resolução automática de idioma/formato, tradutor, **seletor visual** (para todo elemento de uma página de exemplo, o seletor gerado acha exatamente aquele elemento; ids/classes gerados automaticamente são ignorados) e **paridade dos dicionários** (mesmas chaves e parâmetros em pt-BR e en-US, nenhuma chave usada no código sem tradução).
 - Código que depende de `chrome.*` não é testado unitariamente; por isso a lógica pura fica em `src/utils/`.
 - **Fluxo para bugs:** escrever um teste `regressão: …` que falha → corrigir → teste passa → registrar no [CHANGELOG](CHANGELOG.md). Assim cada bug fica rastreável.
@@ -97,6 +97,15 @@ Dicas:
 - É mais pesado que o modo padrão e uma janela pode aparecer rapidamente na barra de tarefas: prefira intervalos de **15 min ou mais** (também evita que o site bloqueie por excesso de acessos).
 - Com essa opção, o seletor visual fica totalmente coerente: o que você escolhe na página montada é exatamente o que a extensão lê.
 - Trocar o modo de leitura recomeça a versão base (o texto lido muda de formato).
+
+#### Avisos que escondem o conteúdo (idade, cookies)
+
+Alguns sites mostram um aviso antes da página — por exemplo **"Você é maior de 18 anos? Sim / Não"** (lojas como as da Vendizap) ou um banner de cookies — e só montam o produto/preço depois da resposta. Com **Ler abrindo a página** marcado, aparece o campo **Antes de ler, clicar no botão com o texto**:
+
+- Escreva o texto exato do botão (ex.: `Sim`, `Aceitar`); maiúsculas e espaços não importam.
+- A cada verificação a extensão espera o botão aparecer, clica nele **uma vez** e só então lê o trecho. Botões invisíveis são ignorados.
+- Se o botão não aparecer (o site lembrou a resposta, ou o trecho já está na tela), ela lê normalmente, sem erro.
+- Quem configura o texto é você: a extensão só clica no que você escreveu, no site em que você configurou.
 
 ### Idioma e formato de hora
 

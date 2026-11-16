@@ -2,6 +2,17 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.6.1] — Salvar não duplica mais
+### Corrigido
+- **Clicar várias vezes em Salvar criava sites duplicados.** O salvamento espera a permissão do site e, às vezes, o teste do trecho (10–20 s lendo pela página aberta); nesse tempo cada clique extra (ou Enter) gravava o site de novo com outro id. Agora: (1) o botão fica desabilitado como "Salvando…" e cliques extras são ignorados; (2) o id do site novo é gerado uma vez, ao abrir o formulário, e a gravação é um *upsert* pelo id (`upsertSite`, `src/utils/site-list.ts`) — salvar de novo atualiza o mesmo site. Teste: `regressão: clicar em Salvar várias vezes no mesmo formulário não duplica o site` (`test/site-list.test.ts`). Verificado no navegador real com cliques de mouse reais: 3 cliques + Enter durante um salvamento lento = 1 site.
+
+## [1.6.0] — Clicar antes de ler (avisos de idade/cookies)
+### Adicionado
+- Campo por site **Antes de ler, clicar no botão com o texto** (`Site.clickBefore`, só com "Ler abrindo a página"). Para sites que escondem o conteúdo atrás de um aviso — ex.: lojas Vendizap com "Você é maior de 18 anos? Sim / Não", em que o produto e o preço só são montados depois do "Sim" — ou banners de cookies. A extensão espera o botão com esse texto (sem diferenciar maiúsculas/espaços, ignorando invisíveis), clica **uma vez** e então lê. Se o botão não aparecer, lê normalmente; se o trecho já estiver na tela, não espera pelo botão.
+- O campo aparece só com "Ler abrindo a página" marcado; mudar o texto recomeça a versão base; backup/importação preserva; a lista de sites mostra "clicando em “Sim” antes de ler".
+- Testes em `test/page-reader.test.ts` (6 novos, incluindo `regressão: aviso de idade — clica em "Sim" e então lê o preço que só aparece depois`).
+- Verificado no navegador real (Edge headless) contra uma página **local** que imita o aviso: sem o clique, preço não encontrado; com "Sim", "R$ 100,00"; "Verificar agora" detectou R$ 100,00 → R$ 101,00; nenhuma janela ficou aberta. (O site real não foi automatizado.)
+
 ## [1.5.1] — Uma só aba de opções
 ### Corrigido
 - **+ Adicionar esta página** abria uma aba nova da extensão a cada clique. Agora reaproveita (e foca) a aba de opções que já estiver aberta, levando o formulário preenchido para ela. O resultado do seletor visual usa o mesmo caminho. A aba é encontrada com `chrome.runtime.getContexts` (enxerga as páginas da própria extensão sem a permissão `tabs`; a busca anterior por `chrome.tabs.query` podia não achá-la). Se essa aba tinha um formulário não salvo aberto, ele é substituído pelo novo.

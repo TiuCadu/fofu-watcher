@@ -34,7 +34,7 @@ async function openOptionsWith(msg: Extract<BgMessage, { type: 'pickerResult' }>
 chrome.runtime.onMessage.addListener((msg: BgMessage & { target?: string }, _sender, sendResponse) => {
   if (msg?.target === 'offscreen') return; 
   if (msg?.type === 'testSelector') {
-    testSelector(msg.url, msg.selector, msg.ignoreVolatile, msg.readMode).then(sendResponse, (e) =>
+    testSelector(msg.url, msg.selector, msg.ignoreVolatile, msg.readMode, msg.clickBefore).then(sendResponse, (e) =>
       sendResponse({ ok: false, error: { key: 'errUnexpected', params: { message: String(e) } } }));
     return true; 
   }

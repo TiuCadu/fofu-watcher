@@ -24,6 +24,7 @@ Extensão MV3 (Chrome/Brave) em TypeScript que monitora sites. Veja o README par
 ## Modo "Ler abrindo a página"
 - `Site.readMode`: `'fetch'` (padrão; ausente = fetch) ou `'tab'`. Em `checker.ts`, `readSite` escolhe; `readViaTab` abre janela minimizada e **sempre** fecha no `finally`.
 - `readRenderedText` (`src/utils/page-reader.ts`) é injetada com `chrome.scripting.executeScript({ func })`: precisa ser **autocontida** (sem imports, sem variáveis externas, sem helpers do bundler — o build usa `target: chrome116`, sem `keepNames`).
+- "Clicar antes de ler" (`Site.clickBefore`, só no modo tab): `readRenderedText` recebe o texto, clica uma vez no botão visível com esse texto e segue lendo mesmo se ele não aparecer. Só clica no que o usuário configurou.
 - Detecção de login/verificação: `isLoginRedirect` (testada). Novos padrões de site que bloqueiam? Adicione um caso em `test/page-reader.test.ts`.
 
 ## Hook automático
