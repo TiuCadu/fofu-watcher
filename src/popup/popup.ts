@@ -1,5 +1,6 @@
 import { describeCheckResult, type CheckMessage } from '../utils/check-result';
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
+import { openOptionsTab } from '../utils/options-tab';
 import { launchPicker } from '../utils/picker-launch';
 import { getSites } from '../utils/storage';
 import { formatDateTime } from '../utils/time';
@@ -64,10 +65,8 @@ document.getElementById('btn-options')!.addEventListener('click', () => chrome.r
 
 document.getElementById('btn-add')!.addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const base = chrome.runtime.getURL('options/options.html');
   if (!tab?.url || !/^https?:/.test(tab.url)) { await chrome.runtime.openOptionsPage(); return; }
-  const q = new URLSearchParams({ add: tab.url, name: tab.title ?? '' });
-  await chrome.tabs.create({ url: `${base}?${q}` });
+  await openOptionsTab(new URLSearchParams({ add: tab.url, name: tab.title ?? '' }));
   window.close();
 });
 

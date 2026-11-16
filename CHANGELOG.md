@@ -2,6 +2,11 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.5.1] — Uma só aba de opções
+### Corrigido
+- **+ Adicionar esta página** abria uma aba nova da extensão a cada clique. Agora reaproveita (e foca) a aba de opções que já estiver aberta, levando o formulário preenchido para ela. O resultado do seletor visual usa o mesmo caminho. A aba é encontrada com `chrome.runtime.getContexts` (enxerga as páginas da própria extensão sem a permissão `tabs`; a busca anterior por `chrome.tabs.query` podia não achá-la). Se essa aba tinha um formulário não salvo aberto, ele é substituído pelo novo.
+- `src/utils/options-tab.ts` (`openOptionsTab`, `pickOptionsContext`). Teste: `regressão: "Adicionar esta página" reaproveita a aba de opções aberta` (`test/options-tab.test.ts`). Verificado no navegador real: 3 cliques seguidos = 1 aba, com o formulário do último site.
+
 ## [1.5.0] — Ler abrindo a página (Mercado Livre e sites com JavaScript)
 ### Adicionado
 - Opção por site **Ler abrindo a página** (`Site.readMode = 'tab'`): a verificação abre o site numa janela minimizada (cookies/login do navegador e JavaScript), espera o trecho aparecer e estabilizar (até 10 s), lê o texto visível e fecha a janela sempre. Serve para sites que pedem login/verificação (ex.: Mercado Livre) e para os que montam o conteúdo com JavaScript. O **Testar** e o aviso ao salvar usam o mesmo modo.

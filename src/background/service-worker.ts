@@ -1,3 +1,4 @@
+import { openOptionsTab } from '../utils/options-tab';
 import { getSites } from '../utils/storage';
 import type { BgMessage, CheckNowResponse } from '../utils/types';
 import { checkSite, testSelector } from './checker';
@@ -27,15 +28,7 @@ async function openOptionsWith(msg: Extract<BgMessage, { type: 'pickerResult' }>
   const q = new URLSearchParams({ selector: msg.selector, preview: msg.preview });
   if (msg.editId) q.set('edit', msg.editId);
   else { q.set('add', msg.url); q.set('name', msg.title); }
-  const base = chrome.runtime.getURL('options/options.html');
-  const url = `${base}?${q}`;
-  const [existing] = await chrome.tabs.query({ url: `${base}*` }).catch(() => []);
-  if (existing?.id != null) {
-    await chrome.tabs.update(existing.id, { url, active: true });
-    if (existing.windowId != null) await chrome.windows.update(existing.windowId, { focused: true });
-  } else {
-    await chrome.tabs.create({ url });
-  }
+  await openOptionsTab(q); 
 }
 
 chrome.runtime.onMessage.addListener((msg: BgMessage & { target?: string }, _sender, sendResponse) => {
