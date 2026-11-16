@@ -1,6 +1,7 @@
 import { diffLines } from '../utils/diff';
 import { errorText, loadI18n } from '../utils/i18n';
 import { sha256Hex } from '../utils/hash';
+import { singleFlight } from '../utils/single-flight';
 import { normalizeText } from '../utils/normalize';
 import { hasHostPermission } from '../utils/permissions';
 import { getSettings, getSite, updateSite } from '../utils/storage';
@@ -84,7 +85,10 @@ async function notify(site: Site, kind: 'changed' | 'error'): Promise<void> {
   });
 }
 
-export async function checkSite(id: string, manual = false): Promise<CheckResult> {
+const checkOnce = singleFlight(runCheck);
+export const checkSite = (id: string, manual = false): Promise<CheckResult> => checkOnce(id, manual);
+
+async function runCheck(id: string, manual: boolean): Promise<CheckResult> {
   const site = await getSite(id);
   if (!site) return { outcome: 'error', error: { key: 'errUnexpected', params: { message: 'site not found' } } };
 

@@ -2,6 +2,11 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.4.1] — Intervalo pontual e cliques durante uma verificação
+### Corrigido
+- **Intervalo de N min rodava a cada N+1 min** (1 min virava 2). O alarm acorda a cada 1 min e o próximo horário era calculado a partir do fim da verificação, alguns segundos depois do tick; no tick seguinte o site estava "segundos adiantado" e era pulado. Agora `isDue` (`src/utils/time.ts`) aceita até 30 s de antecedência no passo normal do modo intervalo; horários fixos e o início da janela continuam sem antecedência. Testes: `regressão: intervalo de 1 min verifica a cada tick (não vira 2 min)` e `regressão: intervalo de 5 min verifica a cada 5 ticks` (`test/scheduling.test.ts`). Confirmado no navegador real (Edge headless, servidor local): a mudança passou a ser detectada no tick seguinte.
+- **"Verificar agora" podia dizer "sem mudanças" e só o 2º clique mostrava a mudança** quando o clique coincidia com uma verificação automática do mesmo site: as duas liam a página nova, a primeira gravava a mudança e a segunda comparava com a base já atualizada. Agora há uma só verificação por site de cada vez (`singleFlight`, `src/utils/single-flight.ts`) e o clique recebe o resultado da que já está rodando. Teste: `regressão: clique durante uma verificação em andamento recebe o MESMO resultado`.
+
 ## [1.4.0] — Exclusão do histórico
 ### Adicionado
 - **Opções → Histórico**: caixa de seleção em cada mudança, **Selecionar todas**, **Excluir selecionadas (N)**, **Excluir todas deste site** e **Limpar histórico de todos os sites**, sempre com confirmação.

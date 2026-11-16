@@ -1,4 +1,5 @@
 import { getSites } from '../utils/storage';
+import { isDue } from '../utils/time';
 import { checkSite } from './checker';
 
 export const TICK_ALARM = 'fofu-tick';
@@ -16,7 +17,7 @@ export async function runDue(): Promise<void> {
   running = true;
   try {
     const now = Date.now();
-    const due = (await getSites()).filter((s) => s.enabled && (s.nextRun == null || s.nextRun <= now));
+    const due = (await getSites()).filter((s) => isDue(s, now));
     for (const s of due) await checkSite(s.id);
   } finally {
     running = false;

@@ -18,6 +18,17 @@ function at(base: Date, minutes: number, dayOffset = 0): Date {
   return d;
 }
 
+export const DUE_GRACE_MS = 30_000;
+
+export function isDue(s: { enabled: boolean; schedule: Schedule; nextRun: number | null; lastCheck: number | null }, now: number): boolean {
+  if (!s.enabled) return false;
+  if (s.nextRun == null) return true;
+  if (s.nextRun <= now) return true;
+  if (s.schedule.mode !== 'interval' || s.lastCheck == null) return false;
+  const regularStep = Math.abs(s.nextRun - s.lastCheck - s.schedule.everyMinutes * 60_000) < 1000;
+  return regularStep && s.nextRun - now <= DUE_GRACE_MS;
+}
+
 export function inWindow(m: number, start: number, end: number): boolean {
   if (start === end) return true;
   return start < end ? m >= start && m < end : m >= start || m < end;
