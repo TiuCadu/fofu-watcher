@@ -123,7 +123,7 @@
     "message": "Change history"
   },
   "historyHint": {
-    "message": "Keeps the last 50 changes of each site."
+    "message": "Keeps the last 50 changes of each site. Only sites that have changed at least once appear here."
   },
   "siteAria": {
     "message": "Site"
@@ -442,5 +442,32 @@
   },
   "checkDetail": {
     "message": "Read now: {chars} characters · fingerprint {hash}"
+  },
+  "historyNone": {
+    "message": "No changes recorded yet. Sites show up here after their first change."
+  },
+  "histSelectAll": {
+    "message": "Select all"
+  },
+  "histSelectEntry": {
+    "message": "Select the change from {date}"
+  },
+  "histDeleteSelected": {
+    "message": "Delete selected ({count})"
+  },
+  "histDeleteSite": {
+    "message": "Delete all for this site"
+  },
+  "histDeleteAllSites": {
+    "message": "Clear history of all sites"
+  },
+  "confirmHistDeleteSelected": {
+    "message": "Delete {count} selected change(s) from the history? This cannot be undone."
+  },
+  "confirmHistDeleteSite": {
+    "message": "Delete the whole history of “{name}”? The site keeps being monitored."
+  },
+  "confirmHistDeleteAll": {
+    "message": "Delete the history of ALL sites? The sites keep being monitored."
   }
 }

@@ -33,6 +33,13 @@
         <select id="hist-site" data-i18n-aria-label="siteAria"></select>
       </div>
       <div class="muted" style="margin-bottom:8px" data-i18n="historyHint"></div>
+      <div id="hist-tools" class="row wrap hidden" style="margin-bottom:8px">
+        <label class="row"><input type="checkbox" id="hist-all"> <span data-i18n="histSelectAll"></span></label>
+        <span class="spacer"></span>
+        <button type="button" id="btn-hist-del-sel" class="small danger" disabled></button>
+        <button type="button" id="btn-hist-del-site" class="small danger" data-i18n="histDeleteSite"></button>
+        <button type="button" id="btn-hist-del-all" class="small danger" data-i18n="histDeleteAllSites"></button>
+      </div>
       <div id="hist"></div>
     </section>
 

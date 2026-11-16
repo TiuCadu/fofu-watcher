@@ -123,7 +123,7 @@
     "message": "Histórico de mudanças"
   },
   "historyHint": {
-    "message": "Guarda as últimas 50 mudanças de cada site."
+    "message": "Guarda as últimas 50 mudanças de cada site. Só aparecem aqui os sites que já tiveram alguma mudança."
   },
   "siteAria": {
     "message": "Site"
@@ -442,5 +442,32 @@
   },
   "checkDetail": {
     "message": "Lido agora: {chars} caracteres · impressão {hash}"
+  },
+  "historyNone": {
+    "message": "Nenhuma mudança registrada ainda. Os sites aparecem aqui quando houver a primeira mudança."
+  },
+  "histSelectAll": {
+    "message": "Selecionar todas"
+  },
+  "histSelectEntry": {
+    "message": "Selecionar a mudança de {date}"
+  },
+  "histDeleteSelected": {
+    "message": "Excluir selecionadas ({count})"
+  },
+  "histDeleteSite": {
+    "message": "Excluir todas deste site"
+  },
+  "histDeleteAllSites": {
+    "message": "Limpar histórico de todos os sites"
+  },
+  "confirmHistDeleteSelected": {
+    "message": "Excluir {count} mudança(s) selecionada(s) do histórico? Isso não pode ser desfeito."
+  },
+  "confirmHistDeleteSite": {
+    "message": "Excluir todo o histórico de “{name}”? O site continua sendo monitorado."
+  },
+  "confirmHistDeleteAll": {
+    "message": "Excluir o histórico de TODOS os sites? Os sites continuam sendo monitorados."
   }
 }

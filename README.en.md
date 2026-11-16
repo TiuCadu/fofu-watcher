@@ -36,7 +36,7 @@ npm test          # tests only
 npm run check     # typecheck + tests + build (run after every change)
 ```
 
-- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation) and `test/url.test.ts` (clickable links: http/https only). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
+- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation) and `test/url.test.ts` (clickable links: http/https only), `test/history.test.ts` (which sites appear in the history and deleting changes), `test/check-result.test.ts` ("Check now" message) and `test/regressions.test.ts` (regressions in `chrome.*` code, via source scan). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
 - Coverage: schedule (fixed times, weekdays, interval, window, window crossing midnight), "Do not disturb", text normalization, volatile-content filtering and line diff; **language and time**: 12h/24h formatting with `Intl`, 12h↔24h conversion (round trip over all 1440 minutes of the day), automatic language/format resolution, translator, **visual picker** (for every element of a sample page, the generated selector finds exactly that element; auto-generated ids/classes are ignored) and **dictionary parity** (same keys and parameters in pt-BR and en-US, no key used in code without a translation).
 - Code that depends on `chrome.*` is not unit-tested, so pure logic lives in `src/utils/`.
 - **Bug workflow:** write a failing `regressão: …` test → fix → test passes → log it in the [CHANGELOG](CHANGELOG.md), so every bug stays traceable.
@@ -56,6 +56,16 @@ npm run check     # typecheck + tests + build (run after every change)
   - The rule summary and the next check are shown in the form, the popup and the list.
 - Clicking the notification (or **View changes**) opens the diff page: green = added, red = removed.
 - Options: language, time format, sound, "Do not disturb", history (last 50 changes per site), JSON export/import.
+
+### Change history
+
+Under **Options → History**:
+
+- Only sites that **have changed at least once** are listed. Sites with no recorded change yet (just added, or never changed) do not appear.
+- Each change has a checkbox. Tick the ones you want and click **Delete selected**; **Select all** ticks/unticks everything for the site.
+- **Delete all for this site** removes the whole history of the chosen site; **Clear history of all sites** removes it for every site.
+- You are always asked to confirm, and it cannot be undone.
+- Deleting history does **not** stop monitoring or change the baseline: the site keeps being checked and the next change shows up again. If a site's history becomes empty, its "unseen" mark (badge) goes away.
 
 ### Pick the part of the page (no CSS needed)
 

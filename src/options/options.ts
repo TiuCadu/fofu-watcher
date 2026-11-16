@@ -1,5 +1,6 @@
 import { describeCheckResult, type CheckMessage } from '../utils/check-result';
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
+import { deleteHistory, sitesWithHistory } from '../utils/history';
 import { hasHostPermission, originPattern } from '../utils/permissions';
 import { launchPicker, waitTabComplete } from '../utils/picker-launch';
 import { DEFAULT_SETTINGS, getSettings, getSites, mutateSites, saveSettings, updateSite } from '../utils/storage';
@@ -278,19 +279,68 @@ form.addEventListener('submit', async (ev) => {
   void chrome.runtime.sendMessage({ type: 'checkDue' });
 });
 
+const histSelected = new Set<number>();
+let histShown: Site | undefined;
+
 async function renderHistoryTab(): Promise<void> {
-  const sites = await getSites();
+  const sites = sitesWithHistory(await getSites());
   const sel = $<HTMLSelectElement>('hist-site');
   const prev = sel.value;
   clear(sel);
   sites.forEach((s) => sel.append(h('option', { value: s.id }, s.name || hostOf(s.url))));
   if (prev && sites.some((s) => s.id === prev)) sel.value = prev;
+  sel.classList.toggle('hidden', !sites.length);
   const site = sites.find((s) => s.id === sel.value);
+  if (site?.id !== histShown?.id) histSelected.clear();
+  for (const ts of [...histSelected]) if (!site?.history.some((e) => e.ts === ts)) histSelected.delete(ts);
+  histShown = site;
+  $('hist-tools').classList.toggle('hidden', !site);
   const box = $('hist');
   clear(box);
-  box.append(site ? renderHistory(site, t, I.fmt, true) : h('div', { class: 'empty' }, t('noSitesShort')));
+  box.append(site
+    ? renderHistory(site, t, I.fmt, true, { selected: histSelected, onChange: updateHistTools })
+    : h('div', { class: 'empty' }, t('historyNone')));
+  updateHistTools();
 }
+
+function updateHistTools(): void {
+  const total = histShown?.history.length ?? 0;
+  const n = histSelected.size;
+  const btn = $<HTMLButtonElement>('btn-hist-del-sel');
+  btn.textContent = t('histDeleteSelected', { count: n });
+  btn.disabled = n === 0;
+  const all = $<HTMLInputElement>('hist-all');
+  all.checked = total > 0 && n === total;
+  all.indeterminate = n > 0 && n < total;
+}
+
+async function deleteHistoryOf(target: 'selected' | 'site' | 'all'): Promise<void> {
+  const site = histShown;
+  if (target !== 'all' && !site) return;
+  const chosen = new Set(histSelected);
+  if (target === 'selected' && !chosen.size) return;
+  const question = target === 'selected' ? t('confirmHistDeleteSelected', { count: chosen.size })
+    : target === 'site' ? t('confirmHistDeleteSite', { name: site!.name || hostOf(site!.url) })
+    : t('confirmHistDeleteAll');
+  if (!confirm(question)) return;
+  await mutateSites((sites) => {
+    for (const s of sites) {
+      if (target === 'all') deleteHistory(s, 'all');
+      else if (s.id === site!.id) deleteHistory(s, target === 'selected' ? chosen : 'all');
+    }
+  });
+  histSelected.clear();
+}
+
 $<HTMLSelectElement>('hist-site').addEventListener('change', () => void renderHistoryTab());
+$<HTMLInputElement>('hist-all').addEventListener('change', (e) => {
+  histSelected.clear();
+  if ((e.target as HTMLInputElement).checked) histShown?.history.forEach((x) => histSelected.add(x.ts));
+  void renderHistoryTab();
+});
+$('btn-hist-del-sel').addEventListener('click', () => void deleteHistoryOf('selected'));
+$('btn-hist-del-site').addEventListener('click', () => void deleteHistoryOf('site'));
+$('btn-hist-del-all').addEventListener('click', () => void deleteHistoryOf('all'));
 
 const msg = (text: string) => { $('settings-msg').textContent = text; };
 

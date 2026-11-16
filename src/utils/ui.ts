@@ -43,7 +43,9 @@ export function renderDiff(lines: DiffLine[], omitted: number, t: Translate): HT
   return box;
 }
 
-export function renderHistory(site: Site, t: Translate, fmt: TimeFormat, openFirst = false): HTMLElement {
+export interface HistorySelection { selected: Set<number>; onChange: () => void }
+
+export function renderHistory(site: Site, t: Translate, fmt: TimeFormat, openFirst = false, select?: HistorySelection): HTMLElement {
   const box = h('div');
   if (!site.history.length) return h('div', { class: 'empty' }, t('noHistory'));
   site.history.forEach((e: HistoryEntry, i) => {
@@ -55,7 +57,14 @@ export function renderHistory(site: Site, t: Translate, fmt: TimeFormat, openFir
       h('summary', {}, formatDateTime(e.ts, fmt) + '  ', h('span', { class: 'plus' }, `+${add}`), ' ', h('span', { class: 'minus' }, `−${del}`)),
       renderDiff(e.diff, e.omitted, t),
     );
-    box.append(d);
+    if (!select) { box.append(d); return; }
+    const cb = h('input', {
+      type: 'checkbox',
+      checked: select.selected.has(e.ts),
+      'aria-label': t('histSelectEntry', { date: formatDateTime(e.ts, fmt) }),
+      onchange: () => { if (cb.checked) select.selected.add(e.ts); else select.selected.delete(e.ts); select.onChange(); },
+    });
+    box.append(h('div', { class: 'entry-row' }, cb, d));
   });
   return box;
 }

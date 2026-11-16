@@ -36,7 +36,7 @@ npm test          # só os testes
 npm run check     # typecheck + testes + build (rode a cada alteração)
 ```
 
-- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
+- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https), `test/history.test.ts` (quais sites aparecem no histórico e exclusão de mudanças), `test/check-result.test.ts` (mensagem do "Verificar agora") e `test/regressions.test.ts` (regressões em código com `chrome.*`, por varredura do código-fonte). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
 - Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", normalização de texto, ignorar voláteis e diff por linhas; **idioma e hora**: formatação 12h/24h com `Intl`, conversão 12h↔24h (ida e volta nos 1440 minutos do dia), resolução automática de idioma/formato, tradutor, **seletor visual** (para todo elemento de uma página de exemplo, o seletor gerado acha exatamente aquele elemento; ids/classes gerados automaticamente são ignorados) e **paridade dos dicionários** (mesmas chaves e parâmetros em pt-BR e en-US, nenhuma chave usada no código sem tradução).
 - Código que depende de `chrome.*` não é testado unitariamente; por isso a lógica pura fica em `src/utils/`.
 - **Fluxo para bugs:** escrever um teste `regressão: …` que falha → corrigir → teste passa → registrar no [CHANGELOG](CHANGELOG.md). Assim cada bug fica rastreável.
@@ -56,6 +56,16 @@ npm run check     # typecheck + testes + build (rode a cada alteração)
   - O resumo da regra e a próxima verificação aparecem no formulário, no popup e na lista.
 - Clicar na notificação (ou em **Ver mudanças**) abre a página de diff: verde = adicionado, vermelho = removido.
 - Opções: idioma, formato de hora, som, “Não perturbe”, histórico (50 últimas mudanças por site), exportar/importar JSON.
+
+### Histórico de mudanças
+
+Em **Opções → Histórico**:
+
+- Só aparecem os sites que **já tiveram alguma mudança**. Sites ainda sem mudanças registradas (acabaram de ser cadastrados ou nunca mudaram) não aparecem na lista.
+- Cada mudança tem uma caixa de seleção. Marque as que quiser e clique em **Excluir selecionadas**; **Selecionar todas** marca/desmarca tudo do site.
+- **Excluir todas deste site** apaga o histórico inteiro do site escolhido; **Limpar histórico de todos os sites** apaga o de todos.
+- Sempre há confirmação antes de excluir, e não dá para desfazer.
+- Excluir histórico **não** para o monitoramento nem muda a versão base: o site continua sendo verificado e a próxima mudança volta a aparecer. Se o histórico do site ficar vazio, o aviso de "não visto" (badge) daquele site some.
 
 ### Escolher a parte da página (sem saber CSS)
 

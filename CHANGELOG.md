@@ -2,6 +2,15 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.4.0] — Exclusão do histórico
+### Adicionado
+- **Opções → Histórico**: caixa de seleção em cada mudança, **Selecionar todas**, **Excluir selecionadas (N)**, **Excluir todas deste site** e **Limpar histórico de todos os sites**, sempre com confirmação.
+- Regras em `src/utils/history.ts` (puras): `sitesWithHistory` e `deleteHistory`. A exclusão identifica as mudanças pela data (`ts`), não pela posição, para não apagar a errada se uma verificação inserir uma mudança nova no topo entre a tela e o clique. Não mexe na versão base; se o histórico do site ficar vazio, zera o "não visto" (badge).
+- Testes: `test/history.test.ts` (7 testes, incluindo `regressão: exclui pela data (ts), não pelo índice…`).
+
+### Alterado
+- A aba **Histórico** só lista sites que já tiveram alguma mudança; sites ainda sem mudanças não aparecem (mensagem própria quando nenhum site tem histórico). Texto de ajuda atualizado nos dois idiomas.
+
 ## [1.3.4] — Alertas voltam a aparecer
 ### Corrigido
 - **Nenhuma notificação de mudança aparecia.** O ícone da notificação usava o caminho relativo `icons/icon128.png`; no service worker ele é resolvido a partir de `background/`, o arquivo não existe e `chrome.notifications.create` falhava com "Unable to download all specified images". A mudança era gravada (histórico/badge), mas o alerta não saía e a verificação manual terminava em erro. Agora usa `chrome.runtime.getURL`. Teste: `regressão: iconUrl das notificações usa chrome.runtime.getURL` (`test/regressions.test.ts`).
