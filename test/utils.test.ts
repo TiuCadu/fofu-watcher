@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { diffLines } from '../src/utils/diff';
 import { normalizeText } from '../src/utils/normalize';
-import { computeNextRun, describeSchedule, inWindow, isDnd } from '../src/utils/time';
+import { computeNextRun, inWindow, isDnd } from '../src/utils/time';
 
 const D = (s: string) => new Date(s); 
 const iso = (ms: number) => { const d = new Date(ms); const p = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
@@ -41,10 +41,6 @@ t('não perturbe', () => {
   assert.ok(isDnd(st, D('2026-03-04T23:10:00')));
   assert.ok(!isDnd(st, D('2026-03-04T12:00:00')));
   assert.ok(!isDnd({ ...st, dndEnabled: false }, D('2026-03-04T23:10:00')));
-});
-t('resumo da regra', () => {
-  assert.equal(describeSchedule({ mode: 'interval', everyMinutes: 90, windowStart: '08:00', windowEnd: '20:00' }), 'A cada 1 h 30 min, entre 08:00 e 20:00');
-  assert.equal(describeSchedule({ mode: 'fixed', times: ['13:00', '09:00'], days: [1, 3] }), 'Às 09:00, 13:00 — seg, qua');
 });
 
 t('normalização: espaços e quebras não geram diferença', () => {

@@ -11,7 +11,7 @@ try {
 } catch { process.exit(0); }
 
 const rel = path.relative(process.cwd(), path.resolve(file)).replaceAll('\\', '/');
-const relevant = /^(src|test)\//.test(rel) || rel === 'build.mjs' || rel === 'manifest.json';
+const relevant = /^(src|test|_locales)\//.test(rel) || rel === 'build.mjs' || rel === 'manifest.json';
 if (!file || !relevant) process.exit(0);
 
 const r = spawnSync('npm test', { shell: true, encoding: 'utf8' });

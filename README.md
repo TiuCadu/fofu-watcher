@@ -1,5 +1,7 @@
 # Fofu Watcher
 
+🇧🇷 Português · [🇺🇸 English](README.en.md)
+
 Extensão (Manifest V3) para **Google Chrome e Brave** que monitora sites e avisa quando o conteúdo muda.
 Tudo roda localmente: sem servidor externo, sem telemetria.
 
@@ -25,7 +27,7 @@ npm run build      # gera a pasta dist/
 4. Em Brave, confira em *Configurações → Sistema/Notificações* e nas notificações do Windows/macOS que o Brave pode exibir avisos.
 
 Depois de alterar o código: `npm run build` e clique em **Recarregar** (↻) na página de extensões.
-Outros comandos: `npm test` (testes de agenda/comparação/diff), `npm run typecheck`.
+Outros comandos: `npm test` (testes de agenda, comparação, diff, idioma e hora), `npm run typecheck`.
 
 ## Testes unitários
 
@@ -34,8 +36,8 @@ npm test          # só os testes
 npm run check     # typecheck + testes + build (rode a cada alteração)
 ```
 
-- Arquivo: `test/utils.test.ts` (runner: `test/run.mjs`, fuso fixo `America/Sao_Paulo`).
-- Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", resumo da regra, normalização de texto, ignorar voláteis e diff por linhas.
+- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
+- Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", normalização de texto, ignorar voláteis e diff por linhas; **idioma e hora**: formatação 12h/24h com `Intl`, conversão 12h↔24h (ida e volta nos 1440 minutos do dia), resolução automática de idioma/formato, tradutor, e **paridade dos dicionários** (mesmas chaves e parâmetros em pt-BR e en-US, nenhuma chave usada no código sem tradução).
 - Código que depende de `chrome.*` não é testado unitariamente; por isso a lógica pura fica em `src/utils/`.
 - **Fluxo para bugs:** escrever um teste `regressão: …` que falha → corrigir → teste passa → registrar no [CHANGELOG](CHANGELOG.md). Assim cada bug fica rastreável.
 
@@ -50,7 +52,18 @@ npm run check     # typecheck + testes + build (rode a cada alteração)
   - *Intervalo*: a cada N minutos/horas, com janela opcional (ex.: 08:00–20:00).
   - O resumo da regra e a próxima verificação aparecem no formulário, no popup e na lista.
 - Clicar na notificação (ou em **Ver mudanças**) abre a página de diff: verde = adicionado, vermelho = removido.
-- Opções: som, “Não perturbe”, histórico (50 últimas mudanças por site), exportar/importar JSON.
+- Opções: idioma, formato de hora, som, “Não perturbe”, histórico (50 últimas mudanças por site), exportar/importar JSON.
+
+### Idioma e formato de hora
+
+Em **Opções → Configurações**:
+
+- **Idioma:** *Seguir o navegador* (padrão), *Português (Brasil)* ou *English (US)*. Navegador em inglês → inglês; português ou qualquer outro idioma → português.
+- **Formato de hora:** *Automático* (padrão: 24h em português, 12h em inglês), *24 horas* ou *12 horas*. É **independente do idioma**: dá para usar interface em inglês com 24h, ou em português com 12h.
+- A troca vale **na hora** em popup, opções, histórico, diff e nas próximas notificações — sem recarregar nem reinstalar.
+- O formato afeta: os horários fixos do agendamento (ex.: `18:00` ou `6:00 PM`), a janela do modo intervalo, o "Não perturbe", a última/próxima verificação e as datas do histórico.
+- Os horários são **sempre guardados em 24h** (`"HH:mm"`) no `chrome.storage.local`; a conversão é só visual, então alternar entre 12h e 24h nunca corrompe agendamentos existentes.
+- Como o `<input type="time">` nativo segue o idioma do sistema e não permite forçar 12h/24h, a extensão usa um seletor de hora próprio (hora, minuto e AM/PM no modo 12h).
 
 ## Arquitetura
 
@@ -60,8 +73,17 @@ src/offscreen   DOMParser: remove script/style/comentários, aplica o seletor CS
 src/popup       lista de sites, status, "Verificar agora"
 src/options     cadastro, agenda, histórico, configurações, backup
 src/diff        página aberta pela notificação
-src/utils       storage, tempo/agenda, normalização, diff, hash, permissões, helpers de UI
+src/utils       storage, tempo/agenda/formatação (time.ts), i18n (i18n.ts), seletor de hora, normalização, diff, hash, permissões, helpers de UI
+_locales/       dicionários pt_BR e en_US (messages.json) — fonte única de todos os textos
 ```
+
+### Internacionalização
+
+- **Nenhum texto fixo no código:** tudo vem de chaves em `_locales/pt_BR/messages.json` e `_locales/en_US/messages.json`. O HTML usa `data-i18n` (e `data-i18n-placeholder` / `-title` / `-aria-label`); o TypeScript usa `t('chave', { parametro })`.
+- **`chrome.i18n`** (com `default_locale: pt_BR` no manifest) traduz o **nome e a descrição** da extensão (inclusive na loja), seguindo o idioma do navegador. Ele não permite troca manual.
+- **Camada própria** (`src/utils/i18n.ts`): lê os **mesmos** `messages.json` conforme a preferência salva no storage, o que permite trocar o idioma dentro da extensão. Mensagens de erro são guardadas como `{ chave, parâmetros }` e traduzidas só na exibição, então também mudam de idioma ao vivo.
+- Datas e horas usam `Intl.DateTimeFormat` com o locale escolhido (`pt-BR`/`en-US`) e o ciclo de horas (12h/24h).
+- **Adicionar um idioma/texto:** inclua a chave nos dois `messages.json` (os testes falham se faltar em algum ou se os `{parâmetros}` divergirem).
 
 - **Agendamento:** cada site guarda seu `nextRun`. Um único `chrome.alarms` de 1 minuto acorda o service worker, que verifica os sites vencidos. O alarm é recriado em `onInstalled`, `onStartup` e a cada despertar do worker. Se o navegador estava fechado no horário, o `nextRun` vencido dispara a verificação atrasada ao abrir.
 - **Detecção:** texto normalizado (espaços/quebras) → SHA-256 → comparação com o hash anterior.

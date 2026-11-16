@@ -40,13 +40,23 @@ export interface Site {
   status: SiteStatus;
   unseen: boolean;
   failures: number;
-  lastError: string | null;
+  lastError: ErrorInfo | string | null;
   baseText: string | null;
   baseHash: string | null;
   history: HistoryEntry[];
 }
 
+export interface ErrorInfo {
+  key: string;
+  params?: Record<string, string | number>;
+}
+
+export type LanguagePref = 'auto' | 'pt-BR' | 'en-US';
+export type HourFormatPref = 'auto' | '12' | '24';
+
 export interface Settings {
+  language: LanguagePref;
+  hourFormat: HourFormatPref;
   sound: boolean;
   dndEnabled: boolean;
   dndStart: string;
@@ -69,4 +79,4 @@ export interface OffscreenRequest {
   ignoreVolatile: boolean;
 }
 
-export type OffscreenResponse = { ok: true; text: string } | { ok: false; error: string };
+export type OffscreenResponse = { ok: true; text: string } | { ok: false; error: ErrorInfo };

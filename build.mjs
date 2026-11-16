@@ -28,6 +28,7 @@ function copyStatic() {
   };
   walk('src');
   fs.copyFileSync('manifest.json', path.join(OUT, 'manifest.json'));
+  fs.cpSync('_locales', path.join(OUT, '_locales'), { recursive: true });
 }
 
 const crcTable = Array.from({ length: 256 }, (_, n) => {

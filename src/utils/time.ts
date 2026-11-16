@@ -52,26 +52,61 @@ export function isDnd(settings: Settings, now: Date): boolean {
   return inWindow(now.getHours() * 60 + now.getMinutes(), parseHM(settings.dndStart), parseHM(settings.dndEnd));
 }
 
-const DAY_NAMES = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
-function fmtEvery(min: number): string {
-  if (min < 60) return `${min} min`;
+export interface TimeFormat {
+  locale: string;
+  hour12: boolean;
+}
+
+export type Translate = (key: string, params?: Record<string, string | number>) => string;
+
+const hourOpts = (f: TimeFormat): Intl.DateTimeFormatOptions => ({
+  hour: f.hour12 ? 'numeric' : '2-digit',
+  minute: '2-digit',
+  hourCycle: f.hour12 ? 'h12' : 'h23',
+});
+
+export function formatHM(hm: string, f: TimeFormat): string {
+  const [h, m] = hm.split(':').map(Number);
+  return new Intl.DateTimeFormat(f.locale, hourOpts(f)).format(new Date(2000, 0, 1, h, m));
+}
+
+export function formatDateTime(ts: number | null, f: TimeFormat): string {
+  if (ts == null) return '—';
+  return new Intl.DateTimeFormat(f.locale, { day: '2-digit', month: '2-digit', year: 'numeric', ...hourOpts(f) }).format(ts);
+}
+
+export function weekdayShort(day: number, f: TimeFormat): string {
+  return new Intl.DateTimeFormat(f.locale, { weekday: 'short' }).format(new Date(2024, 0, 7 + day)).replace(/\.$/, '');
+}
+
+export function to12h(hm: string): { hour: number; minute: number; pm: boolean } {
+  const [h, m] = hm.split(':').map(Number);
+  return { hour: h % 12 || 12, minute: m, pm: h >= 12 };
+}
+
+export function from12h(hour: number, minute: number, pm: boolean): string {
+  const h = (hour % 12) + (pm ? 12 : 0);
+  return `${String(h).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function fmtEvery(min: number, t: Translate): string {
+  if (min < 60) return t('everyMin', { n: min });
   const h = Math.floor(min / 60);
   const r = min % 60;
-  return r ? `${h} h ${r} min` : `${h} h`;
+  return r ? t('everyHourMin', { h, m: r }) : t('everyHour', { n: h });
 }
 
-export function describeSchedule(s: Schedule): string {
+export function describeSchedule(s: Schedule, t: Translate, f: TimeFormat): string {
   if (s.mode === 'fixed') {
-    const times = [...new Set(s.times)].sort().join(', ') || '(sem horários)';
-    const days = s.days.length && s.days.length < 7 ? ` — ${[...s.days].sort().map((d) => DAY_NAMES[d]).join(', ')}` : ' — todos os dias';
-    return `Às ${times}${days}`;
+    const times = [...new Set(s.times)].sort().map((x) => formatHM(x, f)).join(', ') || t('schedNoTimes');
+    const days =
+      s.days.length && s.days.length < 7
+        ? t('schedDays', { days: [...s.days].sort().map((d) => weekdayShort(d, f)).join(', ') })
+        : t('schedAllDays');
+    return t('schedFixed', { times, days });
   }
-  const win = s.windowStart && s.windowEnd ? `, entre ${s.windowStart} e ${s.windowEnd}` : '';
-  return `A cada ${fmtEvery(s.everyMinutes)}${win}`;
+  const win =
+    s.windowStart && s.windowEnd ? t('schedWindow', { start: formatHM(s.windowStart, f), end: formatHM(s.windowEnd, f) }) : '';
+  return t('schedInterval', { every: fmtEvery(s.everyMinutes, t), window: win });
 }
-
-export const formatDateTime = (ts: number | null): string =>
-  ts == null
-    ? '—'
-    : new Date(ts).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });

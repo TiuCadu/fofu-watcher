@@ -1,4 +1,5 @@
 import { diffLines } from '../utils/diff';
+import { errorText, loadI18n } from '../utils/i18n';
 import { sha256Hex } from '../utils/hash';
 import { normalizeText } from '../utils/normalize';
 import { hasHostPermission } from '../utils/permissions';
@@ -6,25 +7,27 @@ import { getSettings, getSite, updateSite } from '../utils/storage';
 import { computeNextRun, isDnd } from '../utils/time';
 import {
   FAILURES_BEFORE_ALERT, MAX_DIFF_LINES, MAX_HISTORY,
-  type OffscreenRequest, type OffscreenResponse, type Site,
+  type ErrorInfo, type OffscreenRequest, type OffscreenResponse, type Site,
 } from '../utils/types';
 
 const FETCH_TIMEOUT_MS = 30_000;
 
-class CheckError extends Error {}
+class CheckError extends Error {
+  constructor(public info: ErrorInfo) { super(info.key); }
+}
 
 async function fetchHtml(site: Site): Promise<string> {
-  if (!(await hasHostPermission(site.url))) throw new CheckError('Sem permissão para este site (edite o site e conceda o acesso)');
+  if (!(await hasHostPermission(site.url))) throw new CheckError({ key: 'errNoPermission' });
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
     const r = await fetch(site.url, { credentials: 'include', signal: ctrl.signal, cache: 'no-store' });
-    if (!r.ok) throw new CheckError(`HTTP ${r.status}`);
+    if (!r.ok) throw new CheckError({ key: 'errHttp', params: { status: r.status } });
     return await r.text();
   } catch (e) {
     if (e instanceof CheckError) throw e;
-    if ((e as Error).name === 'AbortError') throw new CheckError('Tempo esgotado (30 s)');
-    throw new CheckError('Falha de rede: site fora do ar ou sem conexão');
+    if ((e as Error).name === 'AbortError') throw new CheckError({ key: 'errTimeout', params: { seconds: FETCH_TIMEOUT_MS / 1000 } });
+    throw new CheckError({ key: 'errNetwork' });
   } finally {
     clearTimeout(timer);
   }
@@ -48,7 +51,7 @@ async function extractText(html: string, site: Site): Promise<string> {
   await ensureOffscreen();
   const req: OffscreenRequest = { target: 'offscreen', type: 'extract', html, selector: site.selector, ignoreVolatile: site.ignoreVolatile };
   const res = (await chrome.runtime.sendMessage(req)) as OffscreenResponse | undefined;
-  if (!res) throw new CheckError('Sem resposta do analisador de página');
+  if (!res) throw new CheckError({ key: 'errNoAnswer' });
   if (!res.ok) throw new CheckError(res.error);
   return normalizeText(res.text, site.ignoreVolatile);
 }
@@ -56,15 +59,17 @@ async function extractText(html: string, site: Site): Promise<string> {
 async function notify(site: Site, kind: 'changed' | 'error'): Promise<void> {
   const settings = await getSettings();
   if (isDnd(settings, new Date())) return; 
+  const { t } = await loadI18n();
   const changed = kind === 'changed';
+  const name = site.name || site.url;
   await chrome.notifications.create(`fofu:${site.id}`, {
     type: 'basic',
     iconUrl: 'icons/icon128.png',
-    title: changed ? 'Fofu Watcher: site alterado' : 'Fofu Watcher: falha repetida',
+    title: t(changed ? 'notifChangedTitle' : 'notifErrorTitle'),
     message: changed
-      ? `${site.name || site.url} mudou.`
-      : `${site.name || site.url} falhou ${FAILURES_BEFORE_ALERT} vezes seguidas: ${site.lastError ?? 'erro'}`,
-    buttons: changed ? [{ title: 'Ver mudanças' }] : undefined,
+      ? t('notifChangedMsg', { name })
+      : t('notifErrorMsg', { name, count: FAILURES_BEFORE_ALERT, error: errorText(t, site.lastError) }),
+    buttons: changed ? [{ title: t('viewChanges') }] : undefined,
     silent: !settings.sound,
     requireInteraction: false,
   });
@@ -76,12 +81,12 @@ export async function checkSite(id: string, manual = false): Promise<void> {
 
   let newText: string | null = null;
   let newHash: string | null = null;
-  let error: string | null = null;
+  let error: ErrorInfo | null = null;
   try {
     newText = await extractText(await fetchHtml(site), site);
     newHash = await sha256Hex(newText);
   } catch (e) {
-    error = e instanceof CheckError ? e.message : `Erro inesperado: ${(e as Error).message}`;
+    error = e instanceof CheckError ? e.info : { key: 'errUnexpected', params: { message: (e as Error).message } };
   }
 
   let changed = false;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fofu Watcher – configurações</title>
+  <title data-i18n="optionsDocTitle">Fofu Watcher</title>
   <link rel="stylesheet" href="../styles/base.css">
   <link rel="stylesheet" href="options.css">
 </head>
@@ -13,46 +13,66 @@
       <h1>Fofu Watcher</h1>
       <span class="spacer"></span>
       <nav class="row">
-        <button class="tab" data-tab="sites">Sites</button>
-        <button class="tab" data-tab="history">Histórico</button>
-        <button class="tab" data-tab="settings">Configurações</button>
+        <button class="tab" data-tab="sites" data-i18n="tabSites"></button>
+        <button class="tab" data-tab="history" data-i18n="tabHistory"></button>
+        <button class="tab" data-tab="settings" data-i18n="tabSettings"></button>
       </nav>
     </header>
 
     <section id="tab-sites">
       <div class="row" style="margin-bottom:12px">
-        <h2>Sites monitorados</h2><span class="spacer"></span>
-        <button id="btn-new" class="primary">+ Adicionar site</button>
+        <h2 data-i18n="sitesTitle"></h2><span class="spacer"></span>
+        <button id="btn-new" class="primary" data-i18n="addSite"></button>
       </div>
       <div id="sites"></div>
     </section>
 
     <section id="tab-history" class="hidden">
       <div class="row" style="margin-bottom:12px">
-        <h2>Histórico de mudanças</h2><span class="spacer"></span>
-        <select id="hist-site" aria-label="Site"></select>
+        <h2 data-i18n="historyTitle"></h2><span class="spacer"></span>
+        <select id="hist-site" data-i18n-aria-label="siteAria"></select>
       </div>
-      <div class="muted" style="margin-bottom:8px">Guarda as últimas 50 mudanças de cada site.</div>
+      <div class="muted" style="margin-bottom:8px" data-i18n="historyHint"></div>
       <div id="hist"></div>
     </section>
 
     <section id="tab-settings" class="hidden">
-      <h2 style="margin-bottom:12px">Configurações gerais</h2>
+      <h2 style="margin-bottom:12px" data-i18n="settingsTitle"></h2>
       <div class="card stack">
-        <label class="row"><input type="checkbox" id="s-sound"> Tocar som nas notificações</label>
-        <label class="row"><input type="checkbox" id="s-dnd"> Não perturbe entre
-          <input type="time" id="s-dnd-start"> e <input type="time" id="s-dnd-end"></label>
-        <div class="muted">Durante o “Não perturbe” as mudanças continuam sendo registradas (badge e histórico); só a notificação é suprimida.</div>
+        <label>
+          <span data-i18n="settingLanguage"></span>
+          <select id="s-lang">
+            <option value="auto" data-i18n="langAuto"></option>
+            <option value="pt-BR" data-i18n="langPt"></option>
+            <option value="en-US" data-i18n="langEn"></option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="settingHourFormat"></span>
+          <select id="s-hour">
+            <option value="auto" data-i18n="hourAuto"></option>
+            <option value="24" data-i18n="hour24"></option>
+            <option value="12" data-i18n="hour12"></option>
+          </select>
+        </label>
+        <label class="row"><input type="checkbox" id="s-sound"> <span data-i18n="settingSound"></span></label>
+        <div class="row wrap">
+          <label class="row"><input type="checkbox" id="s-dnd"> <span data-i18n="settingDnd"></span></label>
+          <span id="s-dnd-start" class="tp-host"></span>
+          <span data-i18n="and"></span>
+          <span id="s-dnd-end" class="tp-host"></span>
+        </div>
+        <div class="muted" data-i18n="settingDndHint"></div>
       </div>
-      <h3 style="margin:18px 0 8px">Backup</h3>
+      <h3 style="margin:18px 0 8px" data-i18n="backupTitle"></h3>
       <div class="card stack">
         <div class="row wrap">
-          <button id="btn-export">Exportar JSON</button>
-          <button id="btn-import">Importar JSON…</button>
+          <button id="btn-export" data-i18n="btnExport"></button>
+          <button id="btn-import" data-i18n="btnImport"></button>
           <input type="file" id="file-import" accept="application/json,.json" class="hidden">
-          <button id="btn-grant">Conceder permissões dos sites</button>
+          <button id="btn-grant" data-i18n="btnGrant"></button>
         </div>
-        <div class="muted">Depois de importar, clique em “Conceder permissões dos sites” (o navegador exige a sua confirmação para acessar cada site).</div>
+        <div class="muted" data-i18n="backupHint"></div>
         <div id="settings-msg" class="muted" role="status"></div>
       </div>
     </section>
@@ -60,39 +80,41 @@
 
   <dialog id="dlg">
     <form id="form" novalidate>
-      <h2 id="dlg-title">Adicionar site</h2>
+      <h2 id="dlg-title"></h2>
       <div class="stack">
-        <label>URL
-          <input type="url" id="f-url" placeholder="https://exemplo.com/pagina" required></label>
-        <label>Apelido (opcional)
-          <input type="text" id="f-name" placeholder="Ex.: Preço do produto"></label>
-        <label>Seletor CSS (opcional)
-          <input type="text" id="f-selector" placeholder="#preco, .noticias — vazio = página inteira"></label>
+        <label><span data-i18n="fUrl"></span>
+          <input type="url" id="f-url" placeholder="https://example.com/page" required></label>
+        <label><span data-i18n="fName"></span>
+          <input type="text" id="f-name" data-i18n-placeholder="fNamePh"></label>
+        <label><span data-i18n="fSelector"></span>
+          <input type="text" id="f-selector" data-i18n-placeholder="fSelectorPh"></label>
         <label class="row"><input type="checkbox" id="f-ignore" checked>
-          Ignorar elementos que mudam sempre (datas, horas, contadores, tokens)</label>
+          <span data-i18n="fIgnore"></span></label>
 
         <fieldset>
-          <legend>Agendamento</legend>
+          <legend data-i18n="fSchedule"></legend>
           <div class="row">
-            <label class="row"><input type="radio" name="mode" value="fixed" checked> Horários fixos</label>
-            <label class="row"><input type="radio" name="mode" value="interval"> Intervalo</label>
+            <label class="row"><input type="radio" name="mode" value="fixed" checked> <span data-i18n="modeFixed"></span></label>
+            <label class="row"><input type="radio" name="mode" value="interval"> <span data-i18n="modeInterval"></span></label>
           </div>
 
           <div id="mode-fixed" class="stack" style="margin-top:10px">
-            <div class="row"><input type="time" id="f-time" value="09:00"><button type="button" id="btn-add-time">Adicionar horário</button></div>
+            <div class="row"><span id="f-time" class="tp-host"></span><button type="button" id="btn-add-time" data-i18n="addTime"></button></div>
             <div id="chips" class="row wrap"></div>
             <div class="row wrap" id="days">
-              <span class="muted">Dias:</span>
+              <span class="muted" data-i18n="daysLabel"></span>
             </div>
-            <div class="muted">Nenhum dia marcado = todos os dias.</div>
+            <div class="muted" data-i18n="daysHint"></div>
           </div>
 
           <div id="mode-interval" class="stack hidden" style="margin-top:10px">
-            <div class="row">A cada
+            <div class="row"><span data-i18n="everyLabel"></span>
               <input type="number" id="f-every" min="1" value="30" style="width:80px">
-              <select id="f-unit"><option value="1">minutos</option><option value="60">horas</option></select></div>
-            <label class="row"><input type="checkbox" id="f-window"> Só entre
-              <input type="time" id="f-ws" value="08:00"> e <input type="time" id="f-we" value="20:00"></label>
+              <select id="f-unit"><option value="1" data-i18n="unitMinutes"></option><option value="60" data-i18n="unitHours"></option></select></div>
+            <div class="row wrap">
+              <label class="row"><input type="checkbox" id="f-window"> <span data-i18n="windowOnly"></span></label>
+              <span id="f-ws" class="tp-host"></span> <span data-i18n="and"></span> <span id="f-we" class="tp-host"></span>
+            </div>
           </div>
         </fieldset>
 
@@ -100,8 +122,8 @@
         <div id="form-error" class="error-text" role="alert"></div>
         <div class="row">
           <span class="spacer"></span>
-          <button type="button" id="btn-cancel">Cancelar</button>
-          <button type="submit" class="primary">Salvar</button>
+          <button type="button" id="btn-cancel" data-i18n="cancel"></button>
+          <button type="submit" class="primary" data-i18n="save"></button>
         </div>
       </div>
     </form>

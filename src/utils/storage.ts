@@ -1,6 +1,6 @@
 import type { Settings, Site } from './types';
 
-export const DEFAULT_SETTINGS: Settings = { sound: true, dndEnabled: false, dndStart: '22:00', dndEnd: '07:00' };
+export const DEFAULT_SETTINGS: Settings = { language: 'auto', hourFormat: 'auto', sound: true, dndEnabled: false, dndStart: '22:00', dndEnd: '07:00' };
 
 export async function getSites(): Promise<Site[]> {
   const r = await chrome.storage.local.get('sites');

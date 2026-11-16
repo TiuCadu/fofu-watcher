@@ -1,0 +1,365 @@
+{
+  "extName": {
+    "message": "Fofu Watcher"
+  },
+  "extDescription": {
+    "message": "Monitors websites and notifies you when their content changes. Fully local, no telemetry."
+  },
+  "and": {
+    "message": "and"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "viewChanges": {
+    "message": "View changes"
+  },
+  "checkNow": {
+    "message": "Check now"
+  },
+  "checking": {
+    "message": "Checking…"
+  },
+  "lastLabel": {
+    "message": "Last:"
+  },
+  "nextLabel": {
+    "message": "Next:"
+  },
+  "paused": {
+    "message": "paused"
+  },
+  "errorWithCount": {
+    "message": "{error} ({count}×)"
+  },
+  "statusPaused": {
+    "message": "Paused"
+  },
+  "statusChanged": {
+    "message": "Changed"
+  },
+  "statusError": {
+    "message": "Error"
+  },
+  "statusPending": {
+    "message": "Waiting for first check"
+  },
+  "statusOk": {
+    "message": "No change"
+  },
+  "popupAddPage": {
+    "message": "+ Add this page"
+  },
+  "popupAddPageTitle": {
+    "message": "Monitor the open page"
+  },
+  "popupSettingsTitle": {
+    "message": "Open settings"
+  },
+  "popupEmpty1": {
+    "message": "No monitored sites yet."
+  },
+  "popupEmpty2": {
+    "message": "Use “Add this page” or open settings."
+  },
+  "optionsDocTitle": {
+    "message": "Fofu Watcher – settings"
+  },
+  "tabSites": {
+    "message": "Sites"
+  },
+  "tabHistory": {
+    "message": "History"
+  },
+  "tabSettings": {
+    "message": "Settings"
+  },
+  "sitesTitle": {
+    "message": "Monitored sites"
+  },
+  "addSite": {
+    "message": "+ Add site"
+  },
+  "noSites": {
+    "message": "No sites yet. Click “Add site”."
+  },
+  "badgeNew": {
+    "message": "new"
+  },
+  "ruleLabel": {
+    "message": "Rule:"
+  },
+  "siteErrorFails": {
+    "message": "{error} ({count} consecutive failure(s))"
+  },
+  "noPermission": {
+    "message": "No permission to access this site. Edit and save to grant it."
+  },
+  "btnEdit": {
+    "message": "Edit"
+  },
+  "btnPause": {
+    "message": "Pause"
+  },
+  "btnActivate": {
+    "message": "Resume"
+  },
+  "btnRemove": {
+    "message": "Remove"
+  },
+  "confirmRemove": {
+    "message": "Remove “{name}” and all its history?"
+  },
+  "historyTitle": {
+    "message": "Change history"
+  },
+  "historyHint": {
+    "message": "Keeps the last 50 changes of each site."
+  },
+  "siteAria": {
+    "message": "Site"
+  },
+  "noHistory": {
+    "message": "No changes recorded yet."
+  },
+  "noSitesShort": {
+    "message": "No sites yet."
+  },
+  "diffMore": {
+    "message": "… {count} more line(s) not shown"
+  },
+  "diffEmpty": {
+    "message": "No text differences recorded."
+  },
+  "diffDocTitle": {
+    "message": "Fofu Watcher – changes"
+  },
+  "diffTitle": {
+    "message": "Changes"
+  },
+  "diffNotFound": {
+    "message": "Site not found (it may have been removed)."
+  },
+  "settingsTitle": {
+    "message": "General settings"
+  },
+  "settingLanguage": {
+    "message": "Language"
+  },
+  "langAuto": {
+    "message": "Follow browser"
+  },
+  "langPt": {
+    "message": "Português (Brasil)"
+  },
+  "langEn": {
+    "message": "English (US)"
+  },
+  "settingHourFormat": {
+    "message": "Time format"
+  },
+  "hourAuto": {
+    "message": "Automatic (24h for Portuguese, 12h for English)"
+  },
+  "hour24": {
+    "message": "24-hour (18:00)"
+  },
+  "hour12": {
+    "message": "12-hour (6:00 PM)"
+  },
+  "settingSound": {
+    "message": "Play sound on notifications"
+  },
+  "settingDnd": {
+    "message": "Do not disturb between"
+  },
+  "settingDndHint": {
+    "message": "During “Do not disturb” changes are still recorded (badge and history); only the notification is suppressed."
+  },
+  "backupTitle": {
+    "message": "Backup"
+  },
+  "btnExport": {
+    "message": "Export JSON"
+  },
+  "btnImport": {
+    "message": "Import JSON…"
+  },
+  "btnGrant": {
+    "message": "Grant site permissions"
+  },
+  "backupHint": {
+    "message": "After importing, click “Grant site permissions” (the browser requires your confirmation to access each site)."
+  },
+  "msgExported": {
+    "message": "Settings exported."
+  },
+  "msgImportBadFile": {
+    "message": "File is not a Fofu Watcher backup."
+  },
+  "msgImportFail": {
+    "message": "Import failed: {error}"
+  },
+  "confirmImport": {
+    "message": "Import {count} site(s)? This replaces the current sites and settings."
+  },
+  "msgImported": {
+    "message": "{count} site(s) imported. Click “Grant site permissions” to allow access."
+  },
+  "msgGranted": {
+    "message": "Permissions granted."
+  },
+  "msgNotGranted": {
+    "message": "Permissions not granted."
+  },
+  "formAddTitle": {
+    "message": "Add site"
+  },
+  "formEditTitle": {
+    "message": "Edit site"
+  },
+  "fUrl": {
+    "message": "URL"
+  },
+  "fName": {
+    "message": "Nickname (optional)"
+  },
+  "fNamePh": {
+    "message": "E.g.: Product price"
+  },
+  "fSelector": {
+    "message": "CSS selector (optional)"
+  },
+  "fSelectorPh": {
+    "message": "#price, .news — empty = whole page"
+  },
+  "fIgnore": {
+    "message": "Ignore elements that always change (dates, times, counters, tokens)"
+  },
+  "fSchedule": {
+    "message": "Schedule"
+  },
+  "modeFixed": {
+    "message": "Fixed times"
+  },
+  "modeInterval": {
+    "message": "Interval"
+  },
+  "addTime": {
+    "message": "Add time"
+  },
+  "daysLabel": {
+    "message": "Days:"
+  },
+  "daysHint": {
+    "message": "No day selected = every day."
+  },
+  "everyLabel": {
+    "message": "Every"
+  },
+  "unitMinutes": {
+    "message": "minutes"
+  },
+  "unitHours": {
+    "message": "hours"
+  },
+  "windowOnly": {
+    "message": "Only between"
+  },
+  "hourLabel": {
+    "message": "Hour"
+  },
+  "minuteLabel": {
+    "message": "Minute"
+  },
+  "periodLabel": {
+    "message": "AM/PM"
+  },
+  "previewNext": {
+    "message": "{rule}. Next check: {next}"
+  },
+  "errNeedTime": {
+    "message": "Add at least one time."
+  },
+  "errInterval": {
+    "message": "Enter an interval of at least 1 minute."
+  },
+  "errWindow": {
+    "message": "Enter the complete time window."
+  },
+  "errUrl": {
+    "message": "Enter a valid URL (http or https)."
+  },
+  "errPermDenied": {
+    "message": "The site cannot be monitored without permission to access it."
+  },
+  "schedFixed": {
+    "message": "At {times}{days}"
+  },
+  "schedAllDays": {
+    "message": " — every day"
+  },
+  "schedDays": {
+    "message": " — {days}"
+  },
+  "schedNoTimes": {
+    "message": "(no times)"
+  },
+  "schedInterval": {
+    "message": "Every {every}{window}"
+  },
+  "schedWindow": {
+    "message": ", between {start} and {end}"
+  },
+  "everyMin": {
+    "message": "{n} min"
+  },
+  "everyHour": {
+    "message": "{n} h"
+  },
+  "everyHourMin": {
+    "message": "{h} h {m} min"
+  },
+  "notifChangedTitle": {
+    "message": "Fofu Watcher: site changed"
+  },
+  "notifChangedMsg": {
+    "message": "{name} has changed."
+  },
+  "notifErrorTitle": {
+    "message": "Fofu Watcher: repeated failure"
+  },
+  "notifErrorMsg": {
+    "message": "{name} failed {count} times in a row: {error}"
+  },
+  "errNoPermission": {
+    "message": "No permission for this site (edit the site and grant access)"
+  },
+  "errHttp": {
+    "message": "HTTP {status}"
+  },
+  "errTimeout": {
+    "message": "Timed out ({seconds} s)"
+  },
+  "errNetwork": {
+    "message": "Network failure: site is down or you are offline"
+  },
+  "errNoAnswer": {
+    "message": "No response from the page parser"
+  },
+  "errUnexpected": {
+    "message": "Unexpected error: {message}"
+  },
+  "errSelectorInvalid": {
+    "message": "Invalid CSS selector"
+  },
+  "errSelectorNotFound": {
+    "message": "Selector not found on the page"
+  },
+  "errParse": {
+    "message": "Failed to parse the page: {message}"
+  }
+}

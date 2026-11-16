@@ -1,17 +1,39 @@
 {
   "manifest_version": 3,
-  "name": "Fofu Watcher",
-  "version": "1.0.0",
-  "description": "Monitora sites e avisa quando o conteúdo mudar. Tudo local, sem telemetria.",
+  "default_locale": "pt_BR",
+  "name": "__MSG_extName__",
+  "version": "1.1.0",
+  "description": "__MSG_extDescription__",
   "minimum_chrome_version": "116",
-  "permissions": ["storage", "alarms", "notifications", "offscreen", "activeTab"],
-  "optional_host_permissions": ["*://*/*"],
-  "background": { "service_worker": "background/service-worker.js" },
-  "action": {
-    "default_title": "Fofu Watcher",
-    "default_popup": "popup/popup.html",
-    "default_icon": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "offscreen",
+    "activeTab"
+  ],
+  "optional_host_permissions": [
+    "*://*/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
   },
-  "options_ui": { "page": "options/options.html", "open_in_tab": true },
-  "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  "action": {
+    "default_title": "__MSG_extName__",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
 }

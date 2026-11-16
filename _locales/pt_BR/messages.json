@@ -1,0 +1,365 @@
+{
+  "extName": {
+    "message": "Fofu Watcher"
+  },
+  "extDescription": {
+    "message": "Monitora sites e avisa quando o conteúdo mudar. Tudo local, sem telemetria."
+  },
+  "and": {
+    "message": "e"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "save": {
+    "message": "Salvar"
+  },
+  "viewChanges": {
+    "message": "Ver mudanças"
+  },
+  "checkNow": {
+    "message": "Verificar agora"
+  },
+  "checking": {
+    "message": "Verificando…"
+  },
+  "lastLabel": {
+    "message": "Última:"
+  },
+  "nextLabel": {
+    "message": "Próxima:"
+  },
+  "paused": {
+    "message": "pausado"
+  },
+  "errorWithCount": {
+    "message": "{error} ({count}×)"
+  },
+  "statusPaused": {
+    "message": "Pausado"
+  },
+  "statusChanged": {
+    "message": "Alterado"
+  },
+  "statusError": {
+    "message": "Erro"
+  },
+  "statusPending": {
+    "message": "Aguardando 1ª verificação"
+  },
+  "statusOk": {
+    "message": "Sem mudança"
+  },
+  "popupAddPage": {
+    "message": "+ Adicionar esta página"
+  },
+  "popupAddPageTitle": {
+    "message": "Monitorar a página aberta"
+  },
+  "popupSettingsTitle": {
+    "message": "Abrir configurações"
+  },
+  "popupEmpty1": {
+    "message": "Nenhum site monitorado ainda."
+  },
+  "popupEmpty2": {
+    "message": "Use “Adicionar esta página” ou abra as configurações."
+  },
+  "optionsDocTitle": {
+    "message": "Fofu Watcher – configurações"
+  },
+  "tabSites": {
+    "message": "Sites"
+  },
+  "tabHistory": {
+    "message": "Histórico"
+  },
+  "tabSettings": {
+    "message": "Configurações"
+  },
+  "sitesTitle": {
+    "message": "Sites monitorados"
+  },
+  "addSite": {
+    "message": "+ Adicionar site"
+  },
+  "noSites": {
+    "message": "Nenhum site cadastrado. Clique em “Adicionar site”."
+  },
+  "badgeNew": {
+    "message": "novo"
+  },
+  "ruleLabel": {
+    "message": "Regra:"
+  },
+  "siteErrorFails": {
+    "message": "{error} ({count} falha(s) seguida(s))"
+  },
+  "noPermission": {
+    "message": "Sem permissão de acesso a este site. Edite e salve para conceder."
+  },
+  "btnEdit": {
+    "message": "Editar"
+  },
+  "btnPause": {
+    "message": "Pausar"
+  },
+  "btnActivate": {
+    "message": "Ativar"
+  },
+  "btnRemove": {
+    "message": "Remover"
+  },
+  "confirmRemove": {
+    "message": "Remover “{name}” e todo o seu histórico?"
+  },
+  "historyTitle": {
+    "message": "Histórico de mudanças"
+  },
+  "historyHint": {
+    "message": "Guarda as últimas 50 mudanças de cada site."
+  },
+  "siteAria": {
+    "message": "Site"
+  },
+  "noHistory": {
+    "message": "Nenhuma mudança registrada ainda."
+  },
+  "noSitesShort": {
+    "message": "Nenhum site cadastrado."
+  },
+  "diffMore": {
+    "message": "… mais {count} linha(s) não exibida(s)"
+  },
+  "diffEmpty": {
+    "message": "Sem diferenças de texto registradas."
+  },
+  "diffDocTitle": {
+    "message": "Fofu Watcher – mudanças"
+  },
+  "diffTitle": {
+    "message": "Mudanças"
+  },
+  "diffNotFound": {
+    "message": "Site não encontrado (talvez tenha sido removido)."
+  },
+  "settingsTitle": {
+    "message": "Configurações gerais"
+  },
+  "settingLanguage": {
+    "message": "Idioma"
+  },
+  "langAuto": {
+    "message": "Seguir o navegador"
+  },
+  "langPt": {
+    "message": "Português (Brasil)"
+  },
+  "langEn": {
+    "message": "English (US)"
+  },
+  "settingHourFormat": {
+    "message": "Formato de hora"
+  },
+  "hourAuto": {
+    "message": "Automático (24h em português, 12h em inglês)"
+  },
+  "hour24": {
+    "message": "24 horas (18:00)"
+  },
+  "hour12": {
+    "message": "12 horas (6:00 PM)"
+  },
+  "settingSound": {
+    "message": "Tocar som nas notificações"
+  },
+  "settingDnd": {
+    "message": "Não perturbe entre"
+  },
+  "settingDndHint": {
+    "message": "Durante o “Não perturbe” as mudanças continuam sendo registradas (badge e histórico); só a notificação é suprimida."
+  },
+  "backupTitle": {
+    "message": "Backup"
+  },
+  "btnExport": {
+    "message": "Exportar JSON"
+  },
+  "btnImport": {
+    "message": "Importar JSON…"
+  },
+  "btnGrant": {
+    "message": "Conceder permissões dos sites"
+  },
+  "backupHint": {
+    "message": "Depois de importar, clique em “Conceder permissões dos sites” (o navegador exige a sua confirmação para acessar cada site)."
+  },
+  "msgExported": {
+    "message": "Configurações exportadas."
+  },
+  "msgImportBadFile": {
+    "message": "Arquivo não é um backup do Fofu Watcher."
+  },
+  "msgImportFail": {
+    "message": "Falha ao importar: {error}"
+  },
+  "confirmImport": {
+    "message": "Importar {count} site(s)? Isso substitui os sites e configurações atuais."
+  },
+  "msgImported": {
+    "message": "{count} site(s) importado(s). Clique em “Conceder permissões dos sites” para liberar o acesso."
+  },
+  "msgGranted": {
+    "message": "Permissões concedidas."
+  },
+  "msgNotGranted": {
+    "message": "Permissões não concedidas."
+  },
+  "formAddTitle": {
+    "message": "Adicionar site"
+  },
+  "formEditTitle": {
+    "message": "Editar site"
+  },
+  "fUrl": {
+    "message": "URL"
+  },
+  "fName": {
+    "message": "Apelido (opcional)"
+  },
+  "fNamePh": {
+    "message": "Ex.: Preço do produto"
+  },
+  "fSelector": {
+    "message": "Seletor CSS (opcional)"
+  },
+  "fSelectorPh": {
+    "message": "#preco, .noticias — vazio = página inteira"
+  },
+  "fIgnore": {
+    "message": "Ignorar elementos que mudam sempre (datas, horas, contadores, tokens)"
+  },
+  "fSchedule": {
+    "message": "Agendamento"
+  },
+  "modeFixed": {
+    "message": "Horários fixos"
+  },
+  "modeInterval": {
+    "message": "Intervalo"
+  },
+  "addTime": {
+    "message": "Adicionar horário"
+  },
+  "daysLabel": {
+    "message": "Dias:"
+  },
+  "daysHint": {
+    "message": "Nenhum dia marcado = todos os dias."
+  },
+  "everyLabel": {
+    "message": "A cada"
+  },
+  "unitMinutes": {
+    "message": "minutos"
+  },
+  "unitHours": {
+    "message": "horas"
+  },
+  "windowOnly": {
+    "message": "Só entre"
+  },
+  "hourLabel": {
+    "message": "Hora"
+  },
+  "minuteLabel": {
+    "message": "Minuto"
+  },
+  "periodLabel": {
+    "message": "AM/PM"
+  },
+  "previewNext": {
+    "message": "{rule}. Próxima verificação: {next}"
+  },
+  "errNeedTime": {
+    "message": "Adicione ao menos um horário."
+  },
+  "errInterval": {
+    "message": "Informe um intervalo de pelo menos 1 minuto."
+  },
+  "errWindow": {
+    "message": "Informe a janela de horário completa."
+  },
+  "errUrl": {
+    "message": "Informe uma URL válida (http ou https)."
+  },
+  "errPermDenied": {
+    "message": "Sem a permissão de acesso ao site não é possível monitorá-lo."
+  },
+  "schedFixed": {
+    "message": "Às {times}{days}"
+  },
+  "schedAllDays": {
+    "message": " — todos os dias"
+  },
+  "schedDays": {
+    "message": " — {days}"
+  },
+  "schedNoTimes": {
+    "message": "(sem horários)"
+  },
+  "schedInterval": {
+    "message": "A cada {every}{window}"
+  },
+  "schedWindow": {
+    "message": ", entre {start} e {end}"
+  },
+  "everyMin": {
+    "message": "{n} min"
+  },
+  "everyHour": {
+    "message": "{n} h"
+  },
+  "everyHourMin": {
+    "message": "{h} h {m} min"
+  },
+  "notifChangedTitle": {
+    "message": "Fofu Watcher: site alterado"
+  },
+  "notifChangedMsg": {
+    "message": "{name} mudou."
+  },
+  "notifErrorTitle": {
+    "message": "Fofu Watcher: falha repetida"
+  },
+  "notifErrorMsg": {
+    "message": "{name} falhou {count} vezes seguidas: {error}"
+  },
+  "errNoPermission": {
+    "message": "Sem permissão para este site (edite o site e conceda o acesso)"
+  },
+  "errHttp": {
+    "message": "HTTP {status}"
+  },
+  "errTimeout": {
+    "message": "Tempo esgotado ({seconds} s)"
+  },
+  "errNetwork": {
+    "message": "Falha de rede: site fora do ar ou sem conexão"
+  },
+  "errNoAnswer": {
+    "message": "Sem resposta do analisador de página"
+  },
+  "errUnexpected": {
+    "message": "Erro inesperado: {message}"
+  },
+  "errSelectorInvalid": {
+    "message": "Seletor CSS inválido"
+  },
+  "errSelectorNotFound": {
+    "message": "Seletor não encontrado na página"
+  },
+  "errParse": {
+    "message": "Falha ao analisar a página: {message}"
+  }
+}

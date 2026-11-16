@@ -1,14 +1,26 @@
+import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
 import { hasHostPermission, originPattern } from '../utils/permissions';
 import { DEFAULT_SETTINGS, getSettings, getSites, mutateSites, saveSettings, updateSite } from '../utils/storage';
-import { computeNextRun, describeSchedule, formatDateTime, isValidHM } from '../utils/time';
+import { computeNextRun, describeSchedule, formatDateTime, formatHM, isValidHM, weekdayShort } from '../utils/time';
+import { mountTimePicker, type TimePicker } from '../utils/timepicker';
 import { clear, h, hostOf, renderHistory, statusInfo } from '../utils/ui';
-import type { Schedule, Settings, Site } from '../utils/types';
+import type { HourFormatPref, LanguagePref, Schedule, Settings, Site } from '../utils/types';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+let I: I18n;
+const t: I18n['t'] = (key, params) => I.t(key, params);
+
+const pickers = new Map<string, { host: HTMLElement; p: TimePicker }>();
+function mountPicker(id: string, value: string): void {
+  const host = $(id);
+  pickers.set(id, { host, p: mountTimePicker(host, value, I.hour12, t) });
+}
+const pv = (id: string) => pickers.get(id)!.p.get();
+const remountPickers = () => { for (const [id, { p }] of pickers) mountPicker(id, p.get()); };
 
 function showTab(name: string): void {
-  for (const t of ['sites', 'history', 'settings']) $(`tab-${t}`).classList.toggle('hidden', t !== name);
+  for (const x of ['sites', 'history', 'settings']) $(`tab-${x}`).classList.toggle('hidden', x !== name);
   document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   if (name === 'history') void renderHistoryTab();
 }
@@ -17,33 +29,32 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) => b.addEventLi
 async function renderSites(): Promise<void> {
   const sites = await getSites();
   const box = $('sites');
-  clear(box);
-  if (!sites.length) {
-    box.append(h('div', { class: 'empty card' }, 'Nenhum site cadastrado. Clique em “Adicionar site”.'));
-    return;
-  }
+  const cards: HTMLElement[] = [];
   for (const s of sites) {
-    const st = statusInfo(s);
+    const st = statusInfo(s, t);
     const permOk = await hasHostPermission(s.url).catch(() => false);
-    box.append(h('div', { class: `card site${s.enabled ? '' : ' paused'}` },
+    cards.push(h('div', { class: `card site${s.enabled ? '' : ' paused'}` },
       h('div', { class: 'row' },
         h('span', { class: 'title' }, s.name || hostOf(s.url)),
         h('span', { class: `badge ${st.cls}` }, st.label),
-        s.unseen ? h('span', { class: 'badge changed' }, 'novo') : null),
+        s.unseen ? h('span', { class: 'badge changed' }, t('badgeNew')) : null),
       h('div', { class: 'muted url' }, s.url + (s.selector ? `  ·  ${s.selector}` : '')),
       h('div', { class: 'grid muted' },
-        h('span', {}, 'Regra:'), h('span', {}, describeSchedule(s.schedule)),
-        h('span', {}, 'Próxima:'), h('span', {}, s.enabled ? formatDateTime(s.nextRun) : 'pausado'),
-        h('span', {}, 'Última:'), h('span', {}, formatDateTime(s.lastCheck))),
-      s.lastError ? h('div', { class: 'error-text' }, `${s.lastError} (${s.failures} falha(s) seguida(s))`) : null,
-      !permOk ? h('div', { class: 'error-text' }, 'Sem permissão de acesso a este site. Edite e salve para conceder.') : null,
+        h('span', {}, t('ruleLabel')), h('span', {}, describeSchedule(s.schedule, t, I.fmt)),
+        h('span', {}, t('nextLabel')), h('span', {}, s.enabled ? formatDateTime(s.nextRun, I.fmt) : t('paused')),
+        h('span', {}, t('lastLabel')), h('span', {}, formatDateTime(s.lastCheck, I.fmt))),
+      s.lastError ? h('div', { class: 'error-text' }, t('siteErrorFails', { error: errorText(t, s.lastError), count: s.failures })) : null,
+      !permOk ? h('div', { class: 'error-text' }, t('noPermission')) : null,
       h('div', { class: 'row wrap' },
-        h('button', { class: 'small', onclick: () => void chrome.runtime.sendMessage({ type: 'checkNow', id: s.id }) }, 'Verificar agora'),
-        h('button', { class: 'small', onclick: () => openForm(s) }, 'Editar'),
-        h('button', { class: 'small', onclick: () => void toggle(s) }, s.enabled ? 'Pausar' : 'Ativar'),
-        h('button', { class: 'small danger', onclick: () => void remove(s) }, 'Remover')),
+        h('button', { class: 'small', onclick: () => void chrome.runtime.sendMessage({ type: 'checkNow', id: s.id }) }, t('checkNow')),
+        h('button', { class: 'small', onclick: () => openForm(s) }, t('btnEdit')),
+        h('button', { class: 'small', onclick: () => void toggle(s) }, s.enabled ? t('btnPause') : t('btnActivate')),
+        h('button', { class: 'small danger', onclick: () => void remove(s) }, t('btnRemove'))),
     ));
   }
+  clear(box);
+  if (!cards.length) box.append(h('div', { class: 'empty card' }, t('noSites')));
+  else box.append(...cards);
 }
 
 async function toggle(s: Site): Promise<void> {
@@ -55,7 +66,7 @@ async function toggle(s: Site): Promise<void> {
 }
 
 async function remove(s: Site): Promise<void> {
-  if (!confirm(`Remover “${s.name || s.url}” e todo o seu histórico?`)) return;
+  if (!confirm(t('confirmRemove', { name: s.name || s.url }))) return;
   const origin = originPattern(s.url);
   const rest = await mutateSites((sites) => {
     sites.splice(sites.findIndex((x) => x.id === s.id), 1);
@@ -67,29 +78,37 @@ async function remove(s: Site): Promise<void> {
 const dlg = $<HTMLDialogElement>('dlg');
 const form = $<HTMLFormElement>('form');
 let editing: Site | null = null;
-let times: string[] = [];
+let times: string[] = []; 
 
 const daysBox = $('days');
-DAY_LABELS.forEach((d, i) => daysBox.append(h('label', { class: 'day' }, h('input', { type: 'checkbox', 'data-d': String(i) }), d)));
 const dayInputs = () => [...daysBox.querySelectorAll<HTMLInputElement>('input')];
+function renderDays(checked: number[] = dayInputs().filter((i) => i.checked).map((i) => Number(i.dataset.d))): void {
+  daysBox.querySelectorAll('label.day').forEach((l) => l.remove());
+  for (let d = 0; d < 7; d++) {
+    daysBox.append(h('label', { class: 'day' }, h('input', { type: 'checkbox', 'data-d': String(d), checked: checked.includes(d) }), weekdayShort(d, I.fmt)));
+  }
+}
 const mode = () => (form.querySelector<HTMLInputElement>('input[name="mode"]:checked')!.value as 'fixed' | 'interval');
 
 function renderChips(): void {
   const c = $('chips');
   clear(c);
-  times.sort().forEach((t) => c.append(h('span', { class: 'chip' }, t, h('button', { type: 'button', title: 'Remover', onclick: () => { times = times.filter((x) => x !== t); renderChips(); updatePreview(); } }, '×'))));
+  [...times].sort().forEach((x) => c.append(
+    h('span', { class: 'chip' }, formatHM(x, I.fmt),
+      h('button', { type: 'button', title: t('btnRemove'), onclick: () => { times = times.filter((y) => y !== x); renderChips(); updatePreview(); } }, '×')),
+  ));
 }
 
-function readSchedule(): Schedule | string {
+function readSchedule(): Schedule | { error: string } {
   if (mode() === 'fixed') {
-    if (!times.length) return 'Adicione ao menos um horário.';
+    if (!times.length) return { error: 'errNeedTime' };
     return { mode: 'fixed', times: [...times].sort(), days: dayInputs().filter((i) => i.checked).map((i) => Number(i.dataset.d)) };
   }
   const every = Math.round(Number($<HTMLInputElement>('f-every').value) * Number($<HTMLSelectElement>('f-unit').value));
-  if (!(every >= 1)) return 'Informe um intervalo de pelo menos 1 minuto.';
+  if (!(every >= 1)) return { error: 'errInterval' };
   const useWin = $<HTMLInputElement>('f-window').checked;
-  const ws = $<HTMLInputElement>('f-ws').value, we = $<HTMLInputElement>('f-we').value;
-  if (useWin && (!isValidHM(ws) || !isValidHM(we))) return 'Informe a janela de horário completa.';
+  const ws = pv('f-ws'), we = pv('f-we');
+  if (useWin && (!isValidHM(ws) || !isValidHM(we))) return { error: 'errWindow' };
   return { mode: 'interval', everyMinutes: every, windowStart: useWin ? ws : null, windowEnd: useWin ? we : null };
 }
 
@@ -97,12 +116,16 @@ function updatePreview(): void {
   $('mode-fixed').classList.toggle('hidden', mode() !== 'fixed');
   $('mode-interval').classList.toggle('hidden', mode() !== 'interval');
   const s = readSchedule();
-  $('preview').textContent = typeof s === 'string' ? s : `${describeSchedule(s)}. Próxima verificação: ${formatDateTime(computeNextRun(s, new Date()))}`;
+  $('preview').textContent = 'error' in s
+    ? t(s.error)
+    : t('previewNext', { rule: describeSchedule(s, t, I.fmt), next: formatDateTime(computeNextRun(s, new Date()), I.fmt) });
 }
+
+const setDlgTitle = () => { $('dlg-title').textContent = t(editing ? 'formEditTitle' : 'formAddTitle'); };
 
 function openForm(site?: Site, preset?: { url?: string; name?: string }): void {
   editing = site ?? null;
-  $('dlg-title').textContent = site ? 'Editar site' : 'Adicionar site';
+  setDlgTitle();
   $('form-error').textContent = '';
   $<HTMLInputElement>('f-url').value = site?.url ?? preset?.url ?? '';
   $<HTMLInputElement>('f-name').value = site?.name ?? preset?.name ?? '';
@@ -112,14 +135,15 @@ function openForm(site?: Site, preset?: { url?: string; name?: string }): void {
   const sc = site?.schedule;
   form.querySelector<HTMLInputElement>(`input[name="mode"][value="${sc?.mode ?? 'fixed'}"]`)!.checked = true;
   times = sc?.mode === 'fixed' ? [...sc.times] : [];
-  dayInputs().forEach((i) => (i.checked = sc?.mode === 'fixed' && sc.days.includes(Number(i.dataset.d))));
+  renderDays(sc?.mode === 'fixed' ? sc.days : []);
   const every = sc?.mode === 'interval' ? sc.everyMinutes : 30;
   const hours = every >= 60 && every % 60 === 0;
   $<HTMLInputElement>('f-every').value = String(hours ? every / 60 : every);
   $<HTMLSelectElement>('f-unit').value = hours ? '60' : '1';
   $<HTMLInputElement>('f-window').checked = sc?.mode === 'interval' && !!sc.windowStart;
-  $<HTMLInputElement>('f-ws').value = (sc?.mode === 'interval' && sc.windowStart) || '08:00';
-  $<HTMLInputElement>('f-we').value = (sc?.mode === 'interval' && sc.windowEnd) || '20:00';
+  pickers.get('f-time')!.p.set('09:00');
+  pickers.get('f-ws')!.p.set((sc?.mode === 'interval' && sc.windowStart) || '08:00');
+  pickers.get('f-we')!.p.set((sc?.mode === 'interval' && sc.windowEnd) || '20:00');
   renderChips();
   updatePreview();
   dlg.showModal();
@@ -128,7 +152,7 @@ function openForm(site?: Site, preset?: { url?: string; name?: string }): void {
 form.addEventListener('input', updatePreview);
 form.addEventListener('change', updatePreview);
 $('btn-add-time').addEventListener('click', () => {
-  const v = $<HTMLInputElement>('f-time').value;
+  const v = pv('f-time');
   if (isValidHM(v) && !times.includes(v)) { times.push(v); renderChips(); updatePreview(); }
 });
 $('btn-cancel').addEventListener('click', () => dlg.close());
@@ -143,14 +167,14 @@ form.addEventListener('submit', async (ev) => {
   if (url && !/^[a-z]+:\/\//i.test(url)) url = `https://${url}`;
   try {
     if (!/^https?:$/.test(new URL(url).protocol)) throw new Error();
-  } catch { err.textContent = 'Informe uma URL válida (http ou https).'; return; }
+  } catch { err.textContent = t('errUrl'); return; }
   const selector = $<HTMLInputElement>('f-selector').value.trim();
-  if (selector) { try { document.createDocumentFragment().querySelector(selector); } catch { err.textContent = 'Seletor CSS inválido.'; return; } }
+  if (selector) { try { document.createDocumentFragment().querySelector(selector); } catch { err.textContent = t('errSelectorInvalid'); return; } }
   const schedule = readSchedule();
-  if (typeof schedule === 'string') { err.textContent = schedule; return; }
+  if ('error' in schedule) { err.textContent = t(schedule.error); return; }
 
   const granted = await chrome.permissions.request({ origins: [originPattern(url)] });
-  if (!granted) { err.textContent = 'Sem a permissão de acesso ao site não é possível monitorá-lo.'; return; }
+  if (!granted) { err.textContent = t('errPermDenied'); return; }
 
   const name = $<HTMLInputElement>('f-name').value.trim();
   const ignoreVolatile = $<HTMLInputElement>('f-ignore').checked;
@@ -186,36 +210,39 @@ async function renderHistoryTab(): Promise<void> {
   const site = sites.find((s) => s.id === sel.value);
   const box = $('hist');
   clear(box);
-  box.append(site ? renderHistory(site, true) : h('div', { class: 'empty' }, 'Nenhum site cadastrado.'));
+  box.append(site ? renderHistory(site, t, I.fmt, true) : h('div', { class: 'empty' }, t('noSitesShort')));
 }
 $<HTMLSelectElement>('hist-site').addEventListener('change', () => void renderHistoryTab());
 
-const msg = (t: string) => { $('settings-msg').textContent = t; };
+const msg = (text: string) => { $('settings-msg').textContent = text; };
 
-async function loadSettings(): Promise<void> {
+async function loadSettings(): Promise<Settings> {
   const s = await getSettings();
+  $<HTMLSelectElement>('s-lang').value = s.language;
+  $<HTMLSelectElement>('s-hour').value = s.hourFormat;
   $<HTMLInputElement>('s-sound').checked = s.sound;
   $<HTMLInputElement>('s-dnd').checked = s.dndEnabled;
-  $<HTMLInputElement>('s-dnd-start').value = s.dndStart;
-  $<HTMLInputElement>('s-dnd-end').value = s.dndEnd;
+  return s;
 }
 async function persistSettings(): Promise<void> {
-  const start = $<HTMLInputElement>('s-dnd-start').value, end = $<HTMLInputElement>('s-dnd-end').value;
+  const start = pv('s-dnd-start'), end = pv('s-dnd-end');
   await saveSettings({
+    language: $<HTMLSelectElement>('s-lang').value as LanguagePref,
+    hourFormat: $<HTMLSelectElement>('s-hour').value as HourFormatPref,
     sound: $<HTMLInputElement>('s-sound').checked,
     dndEnabled: $<HTMLInputElement>('s-dnd').checked,
     dndStart: isValidHM(start) ? start : DEFAULT_SETTINGS.dndStart,
     dndEnd: isValidHM(end) ? end : DEFAULT_SETTINGS.dndEnd,
   });
 }
-['s-sound', 's-dnd', 's-dnd-start', 's-dnd-end'].forEach((id) => $(id).addEventListener('change', () => void persistSettings()));
+['s-lang', 's-hour', 's-sound', 's-dnd', 's-dnd-start', 's-dnd-end'].forEach((id) => $(id).addEventListener('change', () => void persistSettings()));
 
 $('btn-export').addEventListener('click', async () => {
   const data = { app: 'fofu-watcher', version: 1, exportedAt: new Date().toISOString(), settings: await getSettings(), sites: await getSites() };
   const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })), download: `fofu-watcher-${new Date().toISOString().slice(0, 10)}.json` });
   a.click();
   URL.revokeObjectURL(a.href);
-  msg('Configurações exportadas.');
+  msg(t('msgExported'));
 });
 
 $('btn-import').addEventListener('click', () => $<HTMLInputElement>('file-import').click());
@@ -226,16 +253,16 @@ $<HTMLInputElement>('file-import').addEventListener('change', async (ev) => {
   if (!file) return;
   try {
     const data = JSON.parse(await file.text());
-    if (data?.app !== 'fofu-watcher' || !Array.isArray(data.sites)) throw new Error('Arquivo não é um backup do Fofu Watcher.');
+    if (data?.app !== 'fofu-watcher' || !Array.isArray(data.sites)) throw new Error(t('msgImportBadFile'));
     const sites = data.sites.map(sanitizeSite).filter((s: Site | null): s is Site => s !== null);
-    if (!confirm(`Importar ${sites.length} site(s)? Isso substitui os sites e configurações atuais.`)) return;
+    if (!confirm(t('confirmImport', { count: sites.length }))) return;
     await mutateSites((cur) => { cur.splice(0, cur.length, ...sites); });
     await saveSettings({ ...DEFAULT_SETTINGS, ...(data.settings as Partial<Settings>) });
-    await loadSettings();
-    msg(`${sites.length} site(s) importado(s). Clique em “Conceder permissões dos sites” para liberar o acesso.`);
+    await syncSettingsControls();
+    msg(t('msgImported', { count: sites.length }));
     void chrome.runtime.sendMessage({ type: 'checkDue' });
   } catch (e) {
-    msg(`Falha ao importar: ${(e as Error).message}`);
+    msg(t('msgImportFail', { error: (e as Error).message }));
   }
 });
 
@@ -264,19 +291,48 @@ function sanitizeSite(raw: Partial<Site>): Site | null {
 
 $('btn-grant').addEventListener('click', async () => {
   const origins = [...new Set((await getSites()).map((s) => originPattern(s.url)))];
-  if (!origins.length) { msg('Nenhum site cadastrado.'); return; }
+  if (!origins.length) { msg(t('noSitesShort')); return; }
   const ok = await chrome.permissions.request({ origins });
-  msg(ok ? 'Permissões concedidas.' : 'Permissões não concedidas.');
+  msg(t(ok ? 'msgGranted' : 'msgNotGranted'));
   void renderSites();
   if (ok) void chrome.runtime.sendMessage({ type: 'checkDue' });
 });
 
+async function refreshI18n(): Promise<void> {
+  const prev = I;
+  I = await loadI18n();
+  applyI18n(I);
+  if (prev && prev.lang === I.lang && prev.hour12 === I.hour12) return; 
+  remountPickers();
+  renderDays();
+  renderChips();
+  setDlgTitle();
+  if (dlg.open) updatePreview();
+  await renderSites();
+  if (!$('tab-history').classList.contains('hidden')) await renderHistoryTab();
+}
+
+async function syncSettingsControls(): Promise<void> {
+  const s = await loadSettings();
+  pickers.get('s-dnd-start')!.p.set(s.dndStart);
+  pickers.get('s-dnd-end')!.p.set(s.dndEnd);
+}
+
 chrome.storage.onChanged.addListener((c, area) => {
   if (area !== 'local') return;
-  if (c.sites) { if (!dlg.open) void renderSites(); if (!$('tab-history').classList.contains('hidden')) void renderHistoryTab(); }
+  if (c.settings) void refreshI18n();
+  if (c.sites) {
+    if (!dlg.open) void renderSites();
+    if (!$('tab-history').classList.contains('hidden')) void renderHistoryTab();
+  }
 });
 
 void (async () => {
+  I = await loadI18n();
+  applyI18n(I);
+  const s = await getSettings();
+  for (const [id, v] of [['f-time', '09:00'], ['f-ws', '08:00'], ['f-we', '20:00'], ['s-dnd-start', s.dndStart], ['s-dnd-end', s.dndEnd]] as const) mountPicker(id, v);
+  renderDays([]);
   await loadSettings();
   showTab('sites');
   await renderSites();

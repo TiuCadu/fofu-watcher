@@ -4,14 +4,20 @@ Extensão MV3 (Chrome/Brave) em TypeScript que monitora sites. Veja o README par
 
 ## Regra obrigatória: testes a cada alteração
 - **Depois de QUALQUER alteração em `src/`, `build.mjs` ou `manifest.json`, rode `npm run check`** (typecheck + testes + build) e informe o resultado ao usuário. Não considere a tarefa concluída com o check falhando.
-- Testes unitários: `test/utils.test.ts` (executados por `npm test`, via `test/run.mjs`, com `TZ=America/Sao_Paulo`). Cobrem as partes puras e críticas: agenda (`computeNextRun`, janelas, "Não perturbe"), normalização/voláteis e diff.
+- Testes unitários: `test/*.test.ts` (executados por `npm test`, via `test/run.mjs`, com `TZ=America/Sao_Paulo`). `utils.test.ts`: agenda (`computeNextRun`, janelas, "Não perturbe"), normalização/voláteis e diff. `i18n.test.ts`: formatação 12h/24h, conversão `to12h`/`from12h`, resolução de idioma/formato, tradutor, paridade dos dicionários e varredura das chaves usadas no código.
 - **Mudou ou criou lógica pura em `src/utils/`?** Adicione/ajuste testes na mesma alteração.
 - **Bug encontrado?** Primeiro escreva um teste que reproduz o bug (nome começa com `regressão:`), veja-o falhar, corrija e veja passar. Registre no `CHANGELOG.md` (seção "Corrigido") citando o nome do teste — isso dá a rastreabilidade.
 - Código que usa `chrome.*` (background, popup, options) não tem teste unitário; mantenha a lógica nova em `src/utils/` (pura, sem `chrome.*`) sempre que possível para poder testá-la.
 - Nunca apague/enfraqueça um teste para fazê-lo passar sem avisar o usuário.
 
+## Idioma e hora (i18n)
+- **Nenhum texto fixo de interface no código.** Todo texto vem de `_locales/pt_BR/messages.json` e `_locales/en_US/messages.json` (fonte única, também usada pelo `chrome.i18n` no manifest). HTML: `data-i18n="chave"`; TS: `t('chave', { param })`. Ao criar/alterar texto, edite **os dois** idiomas — o teste de paridade falha se faltar chave ou divergirem os `{parâmetros}`.
+- Mensagens de erro guardadas no storage são `{ key, params }` (`ErrorInfo`), traduzidas só na exibição com `errorText`.
+- **Horários são sempre guardados em `"HH:mm"` (24h).** 12h/24h é só exibição: use `formatHM`/`formatDateTime` (`Intl`, com `hourCycle`) e o `mountTimePicker`. Nunca grave horário formatado no storage.
+- Idioma e formato de hora são independentes (`Settings.language`, `Settings.hourFormat`). Telas devem reagir a `chrome.storage.onChanged` de `settings` e redesenhar sem recarregar.
+
 ## Hook automático
-`.claude/settings.json` define um hook PostToolUse (Edit|Write) que roda `scripts/hook-tests.mjs`: ao editar arquivos de `src/`, `test/`, `build.mjs` ou `manifest.json`, executa `npm test`. Se falhar (exit 2), o erro volta para mim e devo corrigir antes de seguir. O hook só roda os testes; o `npm run check` completo (typecheck + build) continua sendo obrigatório ao concluir.
+`.claude/settings.json` define um hook PostToolUse (Edit|Write) que roda `scripts/hook-tests.mjs`: ao editar arquivos de `src/`, `test/`, `_locales/`, `build.mjs` ou `manifest.json`, executa `npm test`. Se falhar (exit 2), o erro volta para mim e devo corrigir antes de seguir. O hook só roda os testes; o `npm run check` completo (typecheck + build) continua sendo obrigatório ao concluir.
 
 ## Comandos
 - `npm run build` → gera `dist/` · `npm test` → testes · `npm run typecheck` → tsc · `npm run check` → tudo

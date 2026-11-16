@@ -37,9 +37,9 @@ function extract(req: OffscreenRequest): OffscreenResponse {
     try {
       roots = [...doc.querySelectorAll(req.selector)];
     } catch {
-      return { ok: false, error: 'Seletor CSS inválido' };
+      return { ok: false, error: { key: 'errSelectorInvalid' } };
     }
-    if (!roots.length) return { ok: false, error: 'Seletor não encontrado na página' };
+    if (!roots.length) return { ok: false, error: { key: 'errSelectorNotFound' } };
   } else {
     roots = [doc.body ?? doc.documentElement];
   }
@@ -54,6 +54,6 @@ chrome.runtime.onMessage.addListener((msg: OffscreenRequest, _sender, sendRespon
   try {
     sendResponse(extract(msg));
   } catch (e) {
-    sendResponse({ ok: false, error: `Falha ao analisar a página: ${(e as Error).message}` } satisfies OffscreenResponse);
+    sendResponse({ ok: false, error: { key: 'errParse', params: { message: (e as Error).message } } } satisfies OffscreenResponse);
   }
 });

@@ -1,4 +1,4 @@
-import { formatDateTime } from './time';
+import { formatDateTime, type TimeFormat, type Translate } from './time';
 import type { DiffLine, HistoryEntry, Site } from './types';
 
 type Child = Node | string | null | false | undefined;
@@ -22,38 +22,38 @@ export function h<K extends keyof HTMLElementTagNameMap>(
 
 export const clear = (el: Element) => el.replaceChildren();
 
-export function renderDiff(lines: DiffLine[], omitted = 0): HTMLElement {
+export function renderDiff(lines: DiffLine[], omitted: number, t: Translate): HTMLElement {
   const box = h('div', { class: 'diff' });
   for (const l of lines) box.append(h('div', { class: l.t }, (l.t === 'add' ? '+ ' : '− ') + l.line));
-  if (omitted) box.append(h('div', { class: 'more' }, `… mais ${omitted} linha(s) não exibida(s)`));
-  if (!lines.length) box.append(h('div', { class: 'more' }, 'Sem diferenças de texto registradas.'));
+  if (omitted) box.append(h('div', { class: 'more' }, t('diffMore', { count: omitted })));
+  if (!lines.length) box.append(h('div', { class: 'more' }, t('diffEmpty')));
   return box;
 }
 
-export function renderHistory(site: Site, openFirst = false): HTMLElement {
+export function renderHistory(site: Site, t: Translate, fmt: TimeFormat, openFirst = false): HTMLElement {
   const box = h('div');
-  if (!site.history.length) return h('div', { class: 'empty' }, 'Nenhuma mudança registrada ainda.');
+  if (!site.history.length) return h('div', { class: 'empty' }, t('noHistory'));
   site.history.forEach((e: HistoryEntry, i) => {
     const add = e.diff.filter((d) => d.t === 'add').length;
     const del = e.diff.filter((d) => d.t === 'del').length;
     const d = h(
       'details',
       { class: 'entry', open: openFirst && i === 0 },
-      h('summary', {}, formatDateTime(e.ts) + '  ', h('span', { class: 'plus' }, `+${add}`), ' ', h('span', { class: 'minus' }, `−${del}`)),
-      renderDiff(e.diff, e.omitted),
+      h('summary', {}, formatDateTime(e.ts, fmt) + '  ', h('span', { class: 'plus' }, `+${add}`), ' ', h('span', { class: 'minus' }, `−${del}`)),
+      renderDiff(e.diff, e.omitted, t),
     );
     box.append(d);
   });
   return box;
 }
 
-export function statusInfo(s: Site): { label: string; cls: string } {
-  if (!s.enabled) return { label: 'Pausado', cls: 'paused' };
+export function statusInfo(s: Site, t: Translate): { label: string; cls: string } {
+  if (!s.enabled) return { label: t('statusPaused'), cls: 'paused' };
   switch (s.status) {
-    case 'changed': return { label: 'Alterado', cls: 'changed' };
-    case 'error': return { label: 'Erro', cls: 'error' };
-    case 'pending': return { label: 'Aguardando 1ª verificação', cls: 'pending' };
-    default: return { label: 'Sem mudança', cls: 'ok' };
+    case 'changed': return { label: t('statusChanged'), cls: 'changed' };
+    case 'error': return { label: t('statusError'), cls: 'error' };
+    case 'pending': return { label: t('statusPending'), cls: 'pending' };
+    default: return { label: t('statusOk'), cls: 'ok' };
   }
 }
 
