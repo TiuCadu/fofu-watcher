@@ -86,8 +86,24 @@
           <input type="url" id="f-url" placeholder="https://example.com/page" required></label>
         <label><span data-i18n="fName"></span>
           <input type="text" id="f-name" data-i18n-placeholder="fNamePh"></label>
-        <label><span data-i18n="fSelector"></span>
-          <input type="text" id="f-selector" data-i18n-placeholder="fSelectorPh"></label>
+        <fieldset>
+          <legend data-i18n="fPart"></legend>
+          <div class="stack">
+            <div class="muted" data-i18n="fPartHint"></div>
+            <div id="sel-summary"></div>
+            <div class="row wrap">
+              <button type="button" id="btn-pick" class="primary" data-i18n="btnPick"></button>
+              <button type="button" id="btn-test-sel" data-i18n="btnTestSel"></button>
+              <button type="button" id="btn-clear-sel" class="hidden" data-i18n="btnClearSel"></button>
+            </div>
+            <div id="sel-preview" class="card muted hidden" role="status"></div>
+            <details>
+              <summary class="muted" data-i18n="fAdvanced"></summary>
+              <label style="margin-top:8px"><span data-i18n="fSelector"></span>
+                <input type="text" id="f-selector" data-i18n-placeholder="fSelectorPh"></label>
+            </details>
+          </div>
+        </fieldset>
         <label class="row"><input type="checkbox" id="f-ignore" checked>
           <span data-i18n="fIgnore"></span></label>
 

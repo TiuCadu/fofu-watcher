@@ -1,6 +1,6 @@
 import { getSites } from '../utils/storage';
 import type { BgMessage } from '../utils/types';
-import { checkSite } from './checker';
+import { checkSite, testSelector } from './checker';
 import { ensureAlarm, runDue, TICK_ALARM } from './scheduler';
 
 async function updateBadge(): Promise<void> {
@@ -23,8 +23,29 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes.sites) void updateBadge();
 });
 
+async function openOptionsWith(msg: Extract<BgMessage, { type: 'pickerResult' }>): Promise<void> {
+  const q = new URLSearchParams({ selector: msg.selector, preview: msg.preview });
+  if (msg.editId) q.set('edit', msg.editId);
+  else { q.set('add', msg.url); q.set('name', msg.title); }
+  const base = chrome.runtime.getURL('options/options.html');
+  const url = `${base}?${q}`;
+  const [existing] = await chrome.tabs.query({ url: `${base}*` }).catch(() => []);
+  if (existing?.id != null) {
+    await chrome.tabs.update(existing.id, { url, active: true });
+    if (existing.windowId != null) await chrome.windows.update(existing.windowId, { focused: true });
+  } else {
+    await chrome.tabs.create({ url });
+  }
+}
+
 chrome.runtime.onMessage.addListener((msg: BgMessage & { target?: string }, _sender, sendResponse) => {
   if (msg?.target === 'offscreen') return; 
+  if (msg?.type === 'testSelector') {
+    testSelector(msg.url, msg.selector, msg.ignoreVolatile).then(sendResponse, (e) =>
+      sendResponse({ ok: false, error: { key: 'errUnexpected', params: { message: String(e) } } }));
+    return true; 
+  }
+  if (msg?.type === 'pickerResult') { void openOptionsWith(msg); return; }
   const job = msg?.type === 'checkNow' ? checkSite(msg.id, true) : msg?.type === 'checkDue' ? runDue() : null;
   if (!job) return;
   job.then(() => sendResponse({ ok: true }), (e) => sendResponse({ ok: false, error: String(e) }));

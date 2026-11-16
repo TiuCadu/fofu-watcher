@@ -1,3 +1,6 @@
+.sel-code { font-family: ui-monospace, Consolas, monospace; background: var(--bg); padding: 1px 6px; border-radius: 6px; word-break: break-all; }
+#sel-preview { white-space: pre-wrap; word-break: break-word; }
+#sel-preview.bad { color: var(--error); }
 main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
 header { margin-bottom: 20px; }
 header h1 { font-size: 20px; }

@@ -1,4 +1,5 @@
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
+import { launchPicker } from '../utils/picker-launch';
 import { getSites } from '../utils/storage';
 import { formatDateTime } from '../utils/time';
 import { clear, diffUrl, h, hostOf, statusInfo } from '../utils/ui';
@@ -56,6 +57,15 @@ document.getElementById('btn-add')!.addEventListener('click', async () => {
   const q = new URLSearchParams({ add: tab.url, name: tab.title ?? '' });
   await chrome.tabs.create({ url: `${base}?${q}` });
   window.close();
+});
+
+document.getElementById('btn-pick')!.addEventListener('click', async () => {
+  const msg = document.getElementById('msg')!;
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const ok = tab?.id != null && /^https?:/.test(tab.url ?? '') && (await launchPicker(tab.id, I.t));
+  if (ok) { window.close(); return; }
+  msg.textContent = I.t('pickerUnavailable');
+  msg.classList.remove('hidden');
 });
 
 chrome.storage.onChanged.addListener((c, area) => { if (area === 'local' && (c.sites || c.settings)) void render(); });

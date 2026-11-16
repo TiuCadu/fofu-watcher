@@ -1,5 +1,7 @@
 body { width: 400px; min-height: 120px; padding: 10px; }
-header { margin-bottom: 10px; }
+header { margin-bottom: 8px; }
+.pick { width: 100%; margin-bottom: 10px; }
+#msg { margin-bottom: 8px; color: var(--error); font-size: 12px; }
 header h1 { font-size: 16px; }
 #list { display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto; }
 .site .title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

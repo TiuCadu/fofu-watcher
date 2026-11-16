@@ -1,10 +1,11 @@
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
 import { hasHostPermission, originPattern } from '../utils/permissions';
+import { launchPicker, waitTabComplete } from '../utils/picker-launch';
 import { DEFAULT_SETTINGS, getSettings, getSites, mutateSites, saveSettings, updateSite } from '../utils/storage';
 import { computeNextRun, describeSchedule, formatDateTime, formatHM, isValidHM, weekdayShort } from '../utils/time';
 import { mountTimePicker, type TimePicker } from '../utils/timepicker';
 import { clear, h, hostOf, renderHistory, statusInfo } from '../utils/ui';
-import type { HourFormatPref, LanguagePref, Schedule, Settings, Site } from '../utils/types';
+import type { HourFormatPref, LanguagePref, Schedule, Settings, Site, TestSelectorResponse } from '../utils/types';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -123,13 +124,15 @@ function updatePreview(): void {
 
 const setDlgTitle = () => { $('dlg-title').textContent = t(editing ? 'formEditTitle' : 'formAddTitle'); };
 
-function openForm(site?: Site, preset?: { url?: string; name?: string }): void {
+function openForm(site?: Site, preset?: { url?: string; name?: string; selector?: string; preview?: string }): void {
   editing = site ?? null;
   setDlgTitle();
   $('form-error').textContent = '';
   $<HTMLInputElement>('f-url').value = site?.url ?? preset?.url ?? '';
   $<HTMLInputElement>('f-name').value = site?.name ?? preset?.name ?? '';
-  $<HTMLInputElement>('f-selector').value = site?.selector ?? '';
+  $<HTMLInputElement>('f-selector').value = preset?.selector ?? site?.selector ?? '';
+  showSelPreview(preset?.preview ? t('selPicked', { text: preset.preview.slice(0, 200) }) : '');
+  updateSelectorUi();
   $<HTMLInputElement>('f-ignore').checked = site?.ignoreVolatile ?? true;
 
   const sc = site?.schedule;
@@ -158,6 +161,58 @@ $('btn-add-time').addEventListener('click', () => {
 $('btn-cancel').addEventListener('click', () => dlg.close());
 $('btn-new').addEventListener('click', () => openForm());
 
+const selInput = () => $<HTMLInputElement>('f-selector');
+
+function showSelPreview(text: string, bad = false): void {
+  const box = $('sel-preview');
+  box.textContent = text;
+  box.classList.toggle('hidden', !text);
+  box.classList.toggle('bad', bad);
+}
+
+function updateSelectorUi(): void {
+  const sel = selInput().value.trim();
+  const s = $('sel-summary');
+  clear(s);
+  if (sel) s.append(t('selUsing', { selector: '' }), h('span', { class: 'sel-code' }, sel));
+  else s.append(t('selWhole'));
+  $('btn-clear-sel').classList.toggle('hidden', !sel);
+}
+selInput().addEventListener('input', updateSelectorUi);
+$('btn-clear-sel').addEventListener('click', () => { selInput().value = ''; showSelPreview(''); updateSelectorUi(); });
+
+function readUrl(): string | null {
+  let url = $<HTMLInputElement>('f-url').value.trim();
+  if (url && !/^[a-z]+:\/\//i.test(url)) url = `https://${url}`;
+  try { return /^https?:$/.test(new URL(url).protocol) ? url : null; } catch { return null; }
+}
+
+const askTest = (url: string): Promise<TestSelectorResponse> =>
+  chrome.runtime.sendMessage({ type: 'testSelector', url, selector: selInput().value.trim(), ignoreVolatile: $<HTMLInputElement>('f-ignore').checked });
+
+$('btn-test-sel').addEventListener('click', async () => {
+  const url = readUrl();
+  if (!url) { $('form-error').textContent = t('errUrl'); return; }
+  $('form-error').textContent = '';
+  if (!(await chrome.permissions.request({ origins: [originPattern(url)] }))) { $('form-error').textContent = t('errPermDenied'); return; }
+  showSelPreview(t('selTesting'));
+  const r = await askTest(url);
+  if (!r.ok) showSelPreview(t('selTestFail', { error: errorText(t, r.error) }), true);
+  else if (!r.text.trim()) showSelPreview(t('selTestEmpty'), true);
+  else showSelPreview(t('selTestOk', { text: r.text.replace(/\s+/g, ' ').slice(0, 300) }));
+});
+
+$('btn-pick').addEventListener('click', async () => {
+  const url = readUrl();
+  if (!url) { $('form-error').textContent = t('errUrl'); return; }
+  $('form-error').textContent = '';
+  if (!(await chrome.permissions.request({ origins: [originPattern(url)] }))) { $('form-error').textContent = t('errPermDenied'); return; }
+  showSelPreview(t('pickerOpening'));
+  const tab = await chrome.tabs.create({ url, active: true });
+  await waitTabComplete(tab.id!);
+  if (!(await launchPicker(tab.id!, t, editing?.id))) showSelPreview(t('pickerUnavailable'), true);
+});
+
 form.addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const err = $('form-error');
@@ -178,6 +233,12 @@ form.addEventListener('submit', async (ev) => {
 
   const name = $<HTMLInputElement>('f-name').value.trim();
   const ignoreVolatile = $<HTMLInputElement>('f-ignore').checked;
+
+  if (selector && (!editing || editing.url !== url || editing.selector !== selector)) {
+    const r = await askTest(url);
+    const problem = !r.ok ? errorText(t, r.error) : !r.text.trim() ? t('selTestEmpty') : null;
+    if (problem && !confirm(t('warnSelector', { error: problem }))) return;
+  }
 
   if (editing) {
     await updateSite(editing.id, (s) => {
@@ -307,6 +368,7 @@ async function refreshI18n(): Promise<void> {
   renderDays();
   renderChips();
   setDlgTitle();
+  updateSelectorUi();
   if (dlg.open) updatePreview();
   await renderSites();
   if (!$('tab-history').classList.contains('hidden')) await renderHistoryTab();
@@ -337,8 +399,9 @@ void (async () => {
   showTab('sites');
   await renderSites();
   const p = new URLSearchParams(location.search);
-  if (p.get('add')) {
-    openForm(undefined, { url: p.get('add') ?? '', name: p.get('name') ?? '' });
-    history.replaceState(null, '', location.pathname);
-  }
+  const picked = { selector: p.get('selector') ?? undefined, preview: p.get('preview') ?? undefined };
+  const editSite = p.get('edit') ? (await getSites()).find((x) => x.id === p.get('edit')) : undefined;
+  if (editSite) openForm(editSite, picked);
+  else if (p.get('add')) openForm(undefined, { url: p.get('add') ?? '', name: p.get('name') ?? '', ...picked });
+  if (p.has('add') || p.has('edit')) history.replaceState(null, '', location.pathname);
 })();

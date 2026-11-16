@@ -67,9 +67,18 @@ export const MAX_HISTORY = 50;
 export const MAX_DIFF_LINES = 300;
 export const FAILURES_BEFORE_ALERT = 3;
 
+export interface PickerContext {
+  strings: Record<string, string>;
+  editId?: string;
+}
+
 export type BgMessage =
   | { type: 'checkNow'; id: string }
-  | { type: 'checkDue' };
+  | { type: 'checkDue' }
+  | { type: 'testSelector'; url: string; selector: string; ignoreVolatile: boolean }
+  | { type: 'pickerResult'; selector: string; preview: string; url: string; title: string; editId?: string };
+
+export type TestSelectorResponse = { ok: true; text: string } | { ok: false; error: ErrorInfo };
 
 export interface OffscreenRequest {
   target: 'offscreen';

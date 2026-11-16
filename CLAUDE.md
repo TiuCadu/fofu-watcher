@@ -16,6 +16,11 @@ Extensão MV3 (Chrome/Brave) em TypeScript que monitora sites. Veja o README par
 - **Horários são sempre guardados em `"HH:mm"` (24h).** 12h/24h é só exibição: use `formatHM`/`formatDateTime` (`Intl`, com `hourCycle`) e o `mountTimePicker`. Nunca grave horário formatado no storage.
 - Idioma e formato de hora são independentes (`Settings.language`, `Settings.hourFormat`). Telas devem reagir a `chrome.storage.onChanged` de `settings` e redesenhar sem recarregar.
 
+## Seletor visual
+- `src/picker/picker.ts` é injetado na página só sob demanda (`activeTab` + `scripting`), via `src/utils/picker-launch.ts`. Ele só envia o seletor e uma prévia curta ao service worker, que abre/atualiza a página de opções com `?add|edit&selector&preview`.
+- A geração do seletor fica em `src/utils/selector.ts` (pura, testada em `test/selector.test.ts`). Mudou a heurística? Rode a propriedade "para TODO elemento…" e adicione um caso novo.
+- Nada é injetado automaticamente em sites; não adicionar `content_scripts` no manifest nem permissões de host fixas.
+
 ## Hook automático
 `.claude/settings.json` define um hook PostToolUse (Edit|Write) que roda `scripts/hook-tests.mjs`: ao editar arquivos de `src/`, `test/`, `_locales/`, `build.mjs` ou `manifest.json`, executa `npm test`. Se falhar (exit 2), o erro volta para mim e devo corrigir antes de seguir. O hook só roda os testes; o `npm run check` completo (typecheck + build) continua sendo obrigatório ao concluir.
 

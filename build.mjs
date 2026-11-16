@@ -12,6 +12,7 @@ const entries = [
   'src/popup/popup.ts',
   'src/options/options.ts',
   'src/diff/diff.ts',
+  'src/picker/picker.ts',
 ];
 
 function copyStatic() {

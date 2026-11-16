@@ -2,6 +2,20 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.2.0] — Seletor visual (sem precisar saber CSS)
+### Adicionado
+- **◎ Escolher parte da página** no popup: injeta um seletor visual na aba atual (destaca o elemento sob o mouse; clique escolhe, ↑ escolhe o pai, Esc cancela). O formulário abre já preenchido.
+- **Escolher na página** dentro do formulário (abre o site numa aba e injeta o seletor), inclusive ao editar um site existente.
+- **Testar**: mostra o texto que a extensão realmente enxerga no trecho (HTML do `fetch`, via offscreen).
+- Ao salvar um seletor novo/alterado, a extensão confere o trecho no HTML do `fetch` e avisa (com opção de salvar mesmo assim) se não achar nada — caso típico de sites que montam o conteúdo com JavaScript.
+- Campo do seletor CSS movido para **Avançado**; resumo "Monitorando: a página inteira / só: …" e botão para voltar à página inteira.
+- Gerador de seletor (`src/utils/selector.ts`): prefere id estável e atributos de teste (`data-testid`…), ignora ids/classes gerados automaticamente (hashes, CSS-in-JS) e classes de estado, e sobe pelos ancestrais só até ficar único.
+- Permissão `scripting` (junto com `activeTab`): o picker só é injetado na aba em que o usuário clica; nada é injetado automaticamente.
+- Testes: `test/selector.test.ts` (11 testes, com DOM falso e mini motor de seletores; propriedade: para todo elemento, o seletor gerado acha exatamente aquele elemento).
+
+### Alterado
+- Textos do seletor visual nos dois idiomas (`_locales`); `BgMessage` ganhou `testSelector` e `pickerResult`.
+
 ## [1.1.0] — Idioma e formato de hora
 ### Adicionado
 - **Idioma da interface** (Português do Brasil / English US), padrão "seguir o navegador", com troca manual em Opções → Configurações.

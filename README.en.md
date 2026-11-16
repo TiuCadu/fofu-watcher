@@ -36,8 +36,8 @@ npm test          # tests only
 npm run check     # typecheck + tests + build (run after every change)
 ```
 
-- Files: `test/utils.test.ts` (schedule, normalization, diff) and `test/i18n.test.ts` (language and time format). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
-- Coverage: schedule (fixed times, weekdays, interval, window, window crossing midnight), "Do not disturb", text normalization, volatile-content filtering and line diff; **language and time**: 12h/24h formatting with `Intl`, 12h↔24h conversion (round trip over all 1440 minutes of the day), automatic language/format resolution, translator, and **dictionary parity** (same keys and parameters in pt-BR and en-US, no key used in code without a translation).
+- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
+- Coverage: schedule (fixed times, weekdays, interval, window, window crossing midnight), "Do not disturb", text normalization, volatile-content filtering and line diff; **language and time**: 12h/24h formatting with `Intl`, 12h↔24h conversion (round trip over all 1440 minutes of the day), automatic language/format resolution, translator, **visual picker** (for every element of a sample page, the generated selector finds exactly that element; auto-generated ids/classes are ignored) and **dictionary parity** (same keys and parameters in pt-BR and en-US, no key used in code without a translation).
 - Code that depends on `chrome.*` is not unit-tested, so pure logic lives in `src/utils/`.
 - **Bug workflow:** write a failing `regressão: …` test → fix → test passes → log it in the [CHANGELOG](CHANGELOG.md), so every bug stays traceable.
 
@@ -45,6 +45,7 @@ npm run check     # typecheck + tests + build (run after every change)
 
 - **Add the open page:** click the icon → **+ Add this page** (URL and title come pre-filled).
 - **Add manually:** icon → ⚙ → **Add site**.
+- **Monitor only part of a page:** see “Pick the part of the page” below.
 - When saving, the browser asks for access **to that site only** (`optional_host_permissions`).
 - The first check only stores the baseline version, without notifying.
 - **Scheduling** (per site):
@@ -53,6 +54,17 @@ npm run check     # typecheck + tests + build (run after every change)
   - The rule summary and the next check are shown in the form, the popup and the list.
 - Clicking the notification (or **View changes**) opens the diff page: green = added, red = removed.
 - Options: language, time format, sound, "Do not disturb", history (last 50 changes per site), JSON export/import.
+
+### Pick the part of the page (no CSS needed)
+
+By default the whole page is monitored, which triggers alerts for changes that do not matter (ads, clocks…). To monitor only a part (e.g. the price):
+
+1. With the page open, click the icon → **◎ Pick part of the page**.
+2. Move the mouse: the element under the cursor is highlighted. **Click** what you want to monitor (↑ selects the parent element; Esc cancels).
+3. The form opens pre-filled, showing what you picked. Use **Test** to see the text the extension actually sees in that part.
+4. When saving, the extension checks the part against the HTML it receives and warns if it finds nothing (see the limitation below).
+
+You can also use **Pick on the page** inside the form (it opens the site in a tab). The CSS selector remains editable under **Advanced**. The selector prefers `id` and stable attributes (`data-testid`…) and avoids auto-generated or state classes.
 
 ### Language and time format
 
@@ -70,7 +82,8 @@ Under **Options → Settings**:
 ```
 src/background  service worker: "tick" alarm, notifications, badge  | checker.ts: fetch→offscreen→hash→diff
 src/offscreen   DOMParser: strips script/style/comments, applies the CSS selector, extracts text
-src/popup       site list, status, "Check now"
+src/popup       site list, status, "Check now", "Pick part of the page"
+src/picker      visual picker (injected into the page on demand)
 src/options     sites, schedule, history, settings, backup
 src/diff        page opened from the notification
 src/utils       storage, time/schedule/formatting (time.ts), i18n (i18n.ts), time picker, normalization, diff, hash, permissions, UI helpers
@@ -90,13 +103,15 @@ _locales/       pt_BR and en_US dictionaries (messages.json) — single source o
 - **Errors:** failures (site down, 30 s timeout, 403, 404…) never delete the baseline; you are alerted after 3 consecutive failures.
 
 ### Permissions
-`storage`, `alarms`, `notifications`, `offscreen` and `activeTab` (only to read the current tab's URL/title when you click "Add this page"). Site access: only registered sites, on demand.
+`storage`, `alarms`, `notifications`, `offscreen`, `activeTab` and `scripting`. `activeTab` reads the current tab's URL/title when you click "Add this page"; together, `activeTab` and `scripting` inject the visual picker **only** into the tab where you click "Pick part of the page" (nothing is ever injected into sites automatically). Site access: only registered sites, on demand.
 
 ## Known limitations
 
 - Sites that render everything with JavaScript (SPAs) return little HTML to `fetch`; content may not appear. A future improvement would be opening the tab in the background.
 - Checks only run while the browser is open (late ones run on startup) and the effective minimum interval is ~1 minute.
 - Sites with anti-bot/captcha protection or special header requirements may answer 403.
+- The visual picker sees the fully rendered page, but the extension fetches the raw HTML (`fetch`). On sites that build content with JavaScript, the picked part may not exist in the raw HTML; the test on save warns you, but monitoring those sites may not work.
+- The visual picker does not work on browser-internal pages (`chrome://`, `brave://`), the extension store, and some PDF viewers.
 - A wrong CSS selector or dynamic content (ads, recommendations) causes false positives; use the selector and the volatile-content option. Volatile detection is heuristic and may hide real changes in dates/times/numbers followed by "hours", "visits", etc.
 - `chrome.storage.local` quota (~10 MB): very large pages store the whole baseline; history keeps at most 300 diff lines per change.
 - After importing a backup you must grant the site permissions again (browser requirement).

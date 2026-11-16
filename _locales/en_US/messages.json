@@ -361,5 +361,62 @@
   },
   "errParse": {
     "message": "Failed to parse the page: {message}"
+  },
+  "popupPick": {
+    "message": "◎ Pick part of the page"
+  },
+  "popupPickTitle": {
+    "message": "Click a part of the page to monitor only that part"
+  },
+  "fPart": {
+    "message": "Part of the page to monitor"
+  },
+  "fPartHint": {
+    "message": "By default the whole page is monitored. Pick a part (e.g. the price) to avoid alerts for changes that do not matter."
+  },
+  "btnPick": {
+    "message": "Pick on the page"
+  },
+  "btnTestSel": {
+    "message": "Test"
+  },
+  "btnClearSel": {
+    "message": "Use the whole page"
+  },
+  "selWhole": {
+    "message": "Monitoring: the whole page"
+  },
+  "selUsing": {
+    "message": "Monitoring only: {selector}"
+  },
+  "fAdvanced": {
+    "message": "Advanced: edit the CSS selector"
+  },
+  "selPicked": {
+    "message": "You picked: “{text}”"
+  },
+  "selTesting": {
+    "message": "Testing…"
+  },
+  "selTestOk": {
+    "message": "What the extension sees in this part: “{text}”"
+  },
+  "selTestEmpty": {
+    "message": "The part was found but is empty in the HTML the extension receives."
+  },
+  "selTestFail": {
+    "message": "Could not read that part: {error}. On sites that build the page with JavaScript the content may not exist in the raw HTML, and monitoring may not work."
+  },
+  "warnSelector": {
+    "message": "Could not confirm that part in the HTML the extension receives: {error}\n\nSave anyway?"
+  },
+  "pickerBar": {
+    "message": "Click what you want to monitor · ↑ selects the parent element · Esc cancels"
+  },
+  "pickerOpening": {
+    "message": "Opening the page… click the part you want to monitor."
+  },
+  "pickerUnavailable": {
+    "message": "Cannot pick on this page (browser internal pages and the extension store do not allow it)."
   }
 }

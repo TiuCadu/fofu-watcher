@@ -7,7 +7,7 @@ import { getSettings, getSite, updateSite } from '../utils/storage';
 import { computeNextRun, isDnd } from '../utils/time';
 import {
   FAILURES_BEFORE_ALERT, MAX_DIFF_LINES, MAX_HISTORY,
-  type ErrorInfo, type OffscreenRequest, type OffscreenResponse, type Site,
+  type ErrorInfo, type OffscreenRequest, type OffscreenResponse, type Site, type TestSelectorResponse,
 } from '../utils/types';
 
 const FETCH_TIMEOUT_MS = 30_000;
@@ -16,7 +16,7 @@ class CheckError extends Error {
   constructor(public info: ErrorInfo) { super(info.key); }
 }
 
-async function fetchHtml(site: Site): Promise<string> {
+async function fetchHtml(site: Pick<Site, 'url'>): Promise<string> {
   if (!(await hasHostPermission(site.url))) throw new CheckError({ key: 'errNoPermission' });
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
@@ -47,13 +47,22 @@ async function ensureOffscreen(): Promise<void> {
   await creating;
 }
 
-async function extractText(html: string, site: Site): Promise<string> {
+async function extractText(html: string, site: Pick<Site, 'selector' | 'ignoreVolatile'>): Promise<string> {
   await ensureOffscreen();
   const req: OffscreenRequest = { target: 'offscreen', type: 'extract', html, selector: site.selector, ignoreVolatile: site.ignoreVolatile };
   const res = (await chrome.runtime.sendMessage(req)) as OffscreenResponse | undefined;
   if (!res) throw new CheckError({ key: 'errNoAnswer' });
   if (!res.ok) throw new CheckError(res.error);
   return normalizeText(res.text, site.ignoreVolatile);
+}
+
+export async function testSelector(url: string, selector: string, ignoreVolatile: boolean): Promise<TestSelectorResponse> {
+  try {
+    const text = await extractText(await fetchHtml({ url }), { selector, ignoreVolatile });
+    return { ok: true, text };
+  } catch (e) {
+    return { ok: false, error: e instanceof CheckError ? e.info : { key: 'errUnexpected', params: { message: (e as Error).message } } };
+  }
 }
 
 async function notify(site: Site, kind: 'changed' | 'error'): Promise<void> {
