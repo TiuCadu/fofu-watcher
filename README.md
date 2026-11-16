@@ -27,6 +27,18 @@ npm run build      # gera a pasta dist/
 Depois de alterar o código: `npm run build` e clique em **Recarregar** (↻) na página de extensões.
 Outros comandos: `npm test` (testes de agenda/comparação/diff), `npm run typecheck`.
 
+## Testes unitários
+
+```bash
+npm test          # só os testes
+npm run check     # typecheck + testes + build (rode a cada alteração)
+```
+
+- Arquivo: `test/utils.test.ts` (runner: `test/run.mjs`, fuso fixo `America/Sao_Paulo`).
+- Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", resumo da regra, normalização de texto, ignorar voláteis e diff por linhas.
+- Código que depende de `chrome.*` não é testado unitariamente; por isso a lógica pura fica em `src/utils/`.
+- **Fluxo para bugs:** escrever um teste `regressão: …` que falha → corrigir → teste passa → registrar no [CHANGELOG](CHANGELOG.md). Assim cada bug fica rastreável.
+
 ## Como usar
 
 - **Adicionar uma página aberta:** clique no ícone → **+ Adicionar esta página** (a URL e o título já vêm preenchidos).
