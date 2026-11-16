@@ -31,4 +31,10 @@ t('regressão: resposta ausente ou falha do worker não é ignorada em silêncio
   assert.ok(r.isError && r.text.includes('boom'), r.text);
 });
 
+t('detalhe: mostra o tamanho lido e a impressão, para provar que o conteúdo mudou entre cliques', () => {
+  const r = describeCheckResult({ ok: true, result: { outcome: 'unchanged', info: { chars: 1234, hash: 'abcd1234' } } }, tr);
+  assert.ok(r.detail?.includes('abcd1234') && r.detail.includes('1'), r.detail);
+  assert.equal(describeCheckResult(ok('changed'), tr).detail, undefined);
+});
+
 console.log(`${n} testes de resultado da verificação passaram.`);

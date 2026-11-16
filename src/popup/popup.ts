@@ -1,4 +1,4 @@
-import { describeCheckResult } from '../utils/check-result';
+import { describeCheckResult, type CheckMessage } from '../utils/check-result';
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
 import { launchPicker } from '../utils/picker-launch';
 import { getSites } from '../utils/storage';
@@ -9,7 +9,7 @@ import type { Site } from '../utils/types';
 
 const list = document.getElementById('list')!;
 const checking = new Set<string>();
-const results = new Map<string, { text: string; isError: boolean }>();
+const results = new Map<string, CheckMessage>();
 let I: I18n;
 
 function card(s: Site): HTMLElement {
@@ -39,7 +39,8 @@ function card(s: Site): HTMLElement {
       h('span', {}, t('lastLabel')), h('span', {}, formatDateTime(s.lastCheck, fmt)),
       h('span', {}, t('nextLabel')), h('span', {}, s.enabled ? formatDateTime(s.nextRun, fmt) : t('paused'))),
     s.status === 'error' && s.lastError ? h('div', { class: 'err' }, t('errorWithCount', { error: errorText(t, s.lastError), count: s.failures })) : null,
-    res ? h('div', { class: `result${res.isError ? ' err' : ''}`, role: 'status' }, res.text) : null,
+    res ? h('div', { class: `result${res.isError ? ' err' : ''}`, role: 'status' }, res.text,
+      res.detail ? h('div', { class: 'muted' }, res.detail) : null) : null,
     h('div', { class: 'actions' },
       btn,
       isHttpUrl(s.url) ? h('button', { class: 'small', title: t('openSiteTitle', { url: s.url }), onclick: () => chrome.tabs.create({ url: s.url }) }, `${t('openSite')} ↗`) : null,

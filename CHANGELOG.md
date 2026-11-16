@@ -2,6 +2,16 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.3.4] — Alertas voltam a aparecer
+### Corrigido
+- **Nenhuma notificação de mudança aparecia.** O ícone da notificação usava o caminho relativo `icons/icon128.png`; no service worker ele é resolvido a partir de `background/`, o arquivo não existe e `chrome.notifications.create` falhava com "Unable to download all specified images". A mudança era gravada (histórico/badge), mas o alerta não saía e a verificação manual terminava em erro. Agora usa `chrome.runtime.getURL`. Teste: `regressão: iconUrl das notificações usa chrome.runtime.getURL` (`test/regressions.test.ts`).
+- Uma falha ao notificar não derruba mais a verificação: a mudança continua sendo reportada como "mudou" e o erro vai para o console do service worker. Teste: `regressão: falha ao notificar não derruba a verificação`.
+- Encontrado rodando a extensão compilada num navegador real (Edge headless, perfil temporário) contra a página de Mudanças recentes da Wikipédia; após a correção: 2ª/3ª verificação = "mudou" e notificação criada.
+
+## [1.3.3] — Diagnóstico em "Verificar agora"
+### Adicionado
+- O resultado de "Verificar agora" mostra também o que foi lido: nº de caracteres do texto e uma impressão curta (início do SHA-256). Se a impressão não muda entre dois cliques num site que muda, a extensão está lendo sempre o mesmo conteúdo; se muda e o resultado diz "sem mudanças", o problema é a comparação. Usado para investigar um relato (Wikipédia: Mudanças recentes) que a análise offline, com o mesmo normalizeText/diffLines e HTML real, não reproduziu.
+
 ## [1.3.2] — Retorno visível em "Verificar agora"
 ### Corrigido
 - **Verificar agora** parecia não fazer nada: sem mudança não havia nenhum sinal na tela (o "Última verificação" não mostra segundos), e falhas do service worker eram ignoradas. Agora o popup e a lista de opções mostram o resultado de cada verificação manual: "primeira leitura guardada como base", "sem mudanças", "houve mudança!" ou "falha: …". O botão fica desabilitado como "Verificando…" enquanto roda. Testes: `regressão: "Verificar agora" sempre devolve um texto` e `regressão: resposta ausente ou falha do worker não é ignorada` (`test/check-result.test.ts`).

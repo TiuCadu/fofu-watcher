@@ -439,5 +439,8 @@
   },
   "checkFailed": {
     "message": "Falha na verificação: {error}"
+  },
+  "checkDetail": {
+    "message": "Lido agora: {chars} caracteres · impressão {hash}"
   }
 }

@@ -73,7 +73,7 @@ async function notify(site: Site, kind: 'changed' | 'error'): Promise<void> {
   const name = site.name || site.url;
   await chrome.notifications.create(`fofu:${site.id}`, {
     type: 'basic',
-    iconUrl: 'icons/icon128.png',
+    iconUrl: chrome.runtime.getURL('icons/icon128.png'),
     title: t(changed ? 'notifChangedTitle' : 'notifErrorTitle'),
     message: changed
       ? t('notifChangedMsg', { name })
@@ -136,8 +136,12 @@ export async function checkSite(id: string, manual = false): Promise<CheckResult
   });
 
   if (!updated) return { outcome: 'error', error: { key: 'errUnexpected', params: { message: 'site removed' } } };
-  if (changed) await notify(updated, 'changed');
-  else if (failureAlert) await notify(updated, 'error');
+  const logNotifyError = (e: unknown) => console.error('[Fofu] falha ao notificar', e);
+  if (changed) await notify(updated, 'changed').catch(logNotifyError);
+  else if (failureAlert) await notify(updated, 'error').catch(logNotifyError);
   if (error !== null) return { outcome: 'error', error };
-  return { outcome: changed ? 'changed' : firstRun ? 'baseline' : 'unchanged' };
+  return {
+    outcome: changed ? 'changed' : firstRun ? 'baseline' : 'unchanged',
+    info: { chars: newText?.length ?? 0, hash: (newHash ?? '').slice(0, 8) },
+  };
 }

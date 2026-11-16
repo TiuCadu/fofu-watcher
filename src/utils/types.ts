@@ -79,7 +79,11 @@ export type BgMessage =
   | { type: 'pickerResult'; selector: string; preview: string; url: string; title: string; editId?: string };
 
 export type CheckOutcome = 'baseline' | 'unchanged' | 'changed' | 'error';
-export interface CheckResult { outcome: CheckOutcome; error?: ErrorInfo | string | null }
+export interface CheckResult {
+  outcome: CheckOutcome;
+  error?: ErrorInfo | string | null;
+  info?: { chars: number; hash: string };
+}
 export type CheckNowResponse = { ok: true; result: CheckResult } | { ok: false; error: string };
 
 export type TestSelectorResponse = { ok: true; text: string } | { ok: false; error: ErrorInfo };

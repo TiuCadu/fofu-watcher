@@ -439,5 +439,8 @@
   },
   "checkFailed": {
     "message": "Check failed: {error}"
+  },
+  "checkDetail": {
+    "message": "Read now: {chars} characters · fingerprint {hash}"
   }
 }
