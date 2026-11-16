@@ -469,5 +469,23 @@
   },
   "confirmHistDeleteAll": {
     "message": "Delete the history of ALL sites? The sites keep being monitored."
+  },
+  "fReadTab": {
+    "message": "Read by opening the page"
+  },
+  "fReadTabHint": {
+    "message": "For sites that ask for login/verification (e.g. Mercado Livre) or build their content with JavaScript. On every check the extension opens the site in a minimized window, reads the part and closes it. It is heavier: prefer intervals of 15 min or more."
+  },
+  "readModeTab": {
+    "message": "reading the opened page"
+  },
+  "errLoginRequired": {
+    "message": "the site asked for login/verification ({url})"
+  },
+  "errLoginRequiredHint": {
+    "message": "The site replaced the page with a login/verification one ({url}). Tick “Read by opening the page” (and sign in to the site in the browser, if it asks)."
+  },
+  "errTabRead": {
+    "message": "could not read the opened page ({message})"
   }
 }

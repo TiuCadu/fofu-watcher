@@ -27,12 +27,15 @@ export interface HistoryEntry {
   omitted: number;
 }
 
+export type ReadMode = 'fetch' | 'tab';
+
 export interface Site {
   id: string;
   url: string;
   name: string;
   selector: string;
   ignoreVolatile: boolean;
+  readMode?: ReadMode;
   enabled: boolean;
   schedule: Schedule;
   nextRun: number | null;
@@ -75,7 +78,7 @@ export interface PickerContext {
 export type BgMessage =
   | { type: 'checkNow'; id: string }
   | { type: 'checkDue' }
-  | { type: 'testSelector'; url: string; selector: string; ignoreVolatile: boolean }
+  | { type: 'testSelector'; url: string; selector: string; ignoreVolatile: boolean; readMode: ReadMode }
   | { type: 'pickerResult'; selector: string; preview: string; url: string; title: string; editId?: string };
 
 export type CheckOutcome = 'baseline' | 'unchanged' | 'changed' | 'error';

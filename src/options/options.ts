@@ -7,7 +7,7 @@ import { DEFAULT_SETTINGS, getSettings, getSites, mutateSites, saveSettings, upd
 import { computeNextRun, describeSchedule, formatDateTime, formatHM, isValidHM, weekdayShort } from '../utils/time';
 import { mountTimePicker, type TimePicker } from '../utils/timepicker';
 import { clear, h, hostOf, renderHistory, siteLink, statusInfo } from '../utils/ui';
-import type { HourFormatPref, LanguagePref, Schedule, Settings, Site, TestSelectorResponse } from '../utils/types';
+import type { ErrorInfo, HourFormatPref, LanguagePref, ReadMode, Schedule, Settings, Site, TestSelectorResponse } from '../utils/types';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -55,7 +55,7 @@ async function renderSites(): Promise<void> {
         h('span', { class: 'title' }, siteLink(s, t, s.name || hostOf(s.url))),
         h('span', { class: `badge ${st.cls}` }, st.label),
         s.unseen ? h('span', { class: 'badge changed' }, t('badgeNew')) : null),
-      h('div', { class: 'muted url' }, siteLink(s, t, s.url), s.selector ? `  ·  ${s.selector}` : ''),
+      h('div', { class: 'muted url' }, siteLink(s, t, s.url), s.selector ? `  ·  ${s.selector}` : '', s.readMode === 'tab' ? `  ·  ${t('readModeTab')}` : ''),
       h('div', { class: 'grid muted' },
         h('span', {}, t('ruleLabel')), h('span', {}, describeSchedule(s.schedule, t, I.fmt)),
         h('span', {}, t('nextLabel')), h('span', {}, s.enabled ? formatDateTime(s.nextRun, I.fmt) : t('paused')),
@@ -152,6 +152,7 @@ function openForm(site?: Site, preset?: { url?: string; name?: string; selector?
   showSelPreview(preset?.preview ? t('selPicked', { text: preset.preview.slice(0, 200) }) : '');
   updateSelectorUi();
   $<HTMLInputElement>('f-ignore').checked = site?.ignoreVolatile ?? true;
+  $<HTMLInputElement>('f-tab').checked = site?.readMode === 'tab';
 
   const sc = site?.schedule;
   form.querySelector<HTMLInputElement>(`input[name="mode"][value="${sc?.mode ?? 'fixed'}"]`)!.checked = true;
@@ -206,7 +207,11 @@ function readUrl(): string | null {
 }
 
 const askTest = (url: string): Promise<TestSelectorResponse> =>
-  chrome.runtime.sendMessage({ type: 'testSelector', url, selector: selInput().value.trim(), ignoreVolatile: $<HTMLInputElement>('f-ignore').checked });
+  chrome.runtime.sendMessage({ type: 'testSelector', url, selector: selInput().value.trim(), ignoreVolatile: $<HTMLInputElement>('f-ignore').checked, readMode: readModeInput() });
+const readModeInput = (): ReadMode => ($<HTMLInputElement>('f-tab').checked ? 'tab' : 'fetch');
+const testErrorText = (e: ErrorInfo | string) => (typeof e !== 'string' && e.key === 'errLoginRequired' && readModeInput() === 'fetch'
+  ? t('errLoginRequiredHint', e.params ?? {})
+  : t('selTestFail', { error: errorText(t, e) }));
 
 $('btn-test-sel').addEventListener('click', async () => {
   const url = readUrl();
@@ -215,7 +220,7 @@ $('btn-test-sel').addEventListener('click', async () => {
   if (!(await chrome.permissions.request({ origins: [originPattern(url)] }))) { $('form-error').textContent = t('errPermDenied'); return; }
   showSelPreview(t('selTesting'));
   const r = await askTest(url);
-  if (!r.ok) showSelPreview(t('selTestFail', { error: errorText(t, r.error) }), true);
+  if (!r.ok) showSelPreview(testErrorText(r.error), true);
   else if (!r.text.trim()) showSelPreview(t(selInput().value.trim() ? 'selTestEmpty' : 'selTestEmptyPage'), true);
   else showSelPreview(t('selTestOk', { text: r.text.replace(/\s+/g, ' ').slice(0, 300) }));
 });
@@ -251,8 +256,9 @@ form.addEventListener('submit', async (ev) => {
 
   const name = $<HTMLInputElement>('f-name').value.trim();
   const ignoreVolatile = $<HTMLInputElement>('f-ignore').checked;
+  const readMode = readModeInput();
 
-  if (selector && (!editing || editing.url !== url || editing.selector !== selector)) {
+  if (selector && (!editing || editing.url !== url || editing.selector !== selector || (editing.readMode ?? 'fetch') !== readMode)) {
     const r = await askTest(url);
     const problem = !r.ok ? errorText(t, r.error) : !r.text.trim() ? t('selTestEmpty') : null;
     if (problem && !confirm(t('warnSelector', { error: problem }))) return;
@@ -260,15 +266,15 @@ form.addEventListener('submit', async (ev) => {
 
   if (editing) {
     await updateSite(editing.id, (s) => {
-      const rebase = s.url !== url || s.selector !== selector || s.ignoreVolatile !== ignoreVolatile;
-      Object.assign(s, { url, name, selector, ignoreVolatile, schedule });
+      const rebase = s.url !== url || s.selector !== selector || s.ignoreVolatile !== ignoreVolatile || (s.readMode ?? 'fetch') !== readMode;
+      Object.assign(s, { url, name, selector, ignoreVolatile, readMode, schedule });
       if (rebase) Object.assign(s, { baseText: null, baseHash: null, status: 'pending', unseen: false, failures: 0, lastError: null, nextRun: Date.now() });
       else s.nextRun = computeNextRun(schedule, new Date());
     });
   } else {
     await mutateSites((sites) => {
       sites.push({
-        id: crypto.randomUUID(), url, name, selector, ignoreVolatile, enabled: true, schedule,
+        id: crypto.randomUUID(), url, name, selector, ignoreVolatile, readMode, enabled: true, schedule,
         nextRun: Date.now(), 
         lastCheck: null, status: 'pending', unseen: false, failures: 0, lastError: null,
         baseText: null, baseHash: null, history: [],
@@ -408,7 +414,7 @@ function sanitizeSite(raw: Partial<Site>): Site | null {
     return {
       id: typeof raw.id === 'string' && raw.id ? raw.id : crypto.randomUUID(),
       url: raw.url, name: String(raw.name ?? ''), selector: String(raw.selector ?? ''),
-      ignoreVolatile: raw.ignoreVolatile !== false, enabled: raw.enabled !== false, schedule,
+      ignoreVolatile: raw.ignoreVolatile !== false, readMode: raw.readMode === 'tab' ? 'tab' : 'fetch', enabled: raw.enabled !== false, schedule,
       nextRun: Date.now(), lastCheck: raw.lastCheck ?? null,
       status: raw.baseHash ? 'ok' : 'pending', unseen: false, failures: 0, lastError: null,
       baseText: raw.baseText ?? null, baseHash: raw.baseHash ?? null,

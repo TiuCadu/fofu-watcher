@@ -2,6 +2,17 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.5.0] — Ler abrindo a página (Mercado Livre e sites com JavaScript)
+### Adicionado
+- Opção por site **Ler abrindo a página** (`Site.readMode = 'tab'`): a verificação abre o site numa janela minimizada (cookies/login do navegador e JavaScript), espera o trecho aparecer e estabilizar (até 10 s), lê o texto visível e fecha a janela sempre. Serve para sites que pedem login/verificação (ex.: Mercado Livre) e para os que montam o conteúdo com JavaScript. O **Testar** e o aviso ao salvar usam o mesmo modo.
+- Detecção de **login/verificação**: no modo padrão (`fetch`), se o site redireciona para uma página de login/verificação/captcha (ex.: `/gz/account-verification` do Mercado Livre), o erro agora é "o site pediu login/verificação (…)", e o **Testar** sugere marcar "Ler abrindo a página" — antes aparecia "Seletor não encontrado".
+- `src/utils/page-reader.ts`: `isLoginRedirect`, `shortUrl` e `readRenderedText` (função injetada na página, autocontida). Testes: `test/page-reader.test.ts` (9, incluindo `regressão: Mercado Livre redirecionando para account-verification é login/verificação`).
+- Verificado no navegador real (Edge headless, servidor local): preço montado por JavaScript lido como "R$ 100" (fetch: vazio), redirecionamento para verificação reportado nos dois modos, "Verificar agora" detectou R$ 100 → R$ 101 e nenhuma janela ficou aberta.
+
+### Alterado
+- Trocar o modo de leitura recomeça a versão base. Backup/importação preserva o modo. A lista de sites mostra "lendo pela página aberta".
+- Nenhuma permissão nova no manifest (`chrome.windows` não exige; o `scripting` usa a permissão do site já concedida).
+
 ## [1.4.1] — Intervalo pontual e cliques durante uma verificação
 ### Corrigido
 - **Intervalo de N min rodava a cada N+1 min** (1 min virava 2). O alarm acorda a cada 1 min e o próximo horário era calculado a partir do fim da verificação, alguns segundos depois do tick; no tick seguinte o site estava "segundos adiantado" e era pulado. Agora `isDue` (`src/utils/time.ts`) aceita até 30 s de antecedência no passo normal do modo intervalo; horários fixos e o início da janela continuam sem antecedência. Testes: `regressão: intervalo de 1 min verifica a cada tick (não vira 2 min)` e `regressão: intervalo de 5 min verifica a cada 5 ticks` (`test/scheduling.test.ts`). Confirmado no navegador real (Edge headless, servidor local): a mudança passou a ser detectada no tick seguinte.

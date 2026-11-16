@@ -1,6 +1,6 @@
 {
   "name": "fofu-watcher",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "private": true,
   "description": "Extensão MV3 (Chrome/Brave) que monitora sites e avisa quando o conteúdo muda.",
   "scripts": {

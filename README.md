@@ -36,7 +36,7 @@ npm test          # só os testes
 npm run check     # typecheck + testes + build (rode a cada alteração)
 ```
 
-- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https), `test/history.test.ts` (quais sites aparecem no histórico e exclusão de mudanças), `test/scheduling.test.ts` (simulação do tick de 1 minuto: o intervalo não atrasa; cliques durante uma verificação), `test/check-result.test.ts` (mensagem do "Verificar agora") e `test/regressions.test.ts` (regressões em código com `chrome.*`, por varredura do código-fonte). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
+- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https), `test/history.test.ts` (quais sites aparecem no histórico e exclusão de mudanças), `test/scheduling.test.ts` (simulação do tick de 1 minuto: o intervalo não atrasa; cliques durante uma verificação), `test/page-reader.test.ts` (modo "Ler abrindo a página": detecção de login/verificação e leitura do conteúdo montado), `test/check-result.test.ts` (mensagem do "Verificar agora") e `test/regressions.test.ts` (regressões em código com `chrome.*`, por varredura do código-fonte). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
 - Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", normalização de texto, ignorar voláteis e diff por linhas; **idioma e hora**: formatação 12h/24h com `Intl`, conversão 12h↔24h (ida e volta nos 1440 minutos do dia), resolução automática de idioma/formato, tradutor, **seletor visual** (para todo elemento de uma página de exemplo, o seletor gerado acha exatamente aquele elemento; ids/classes gerados automaticamente são ignorados) e **paridade dos dicionários** (mesmas chaves e parâmetros em pt-BR e en-US, nenhuma chave usada no código sem tradução).
 - Código que depende de `chrome.*` não é testado unitariamente; por isso a lógica pura fica em `src/utils/`.
 - **Fluxo para bugs:** escrever um teste `regressão: …` que falha → corrigir → teste passa → registrar no [CHANGELOG](CHANGELOG.md). Assim cada bug fica rastreável.
@@ -78,6 +78,26 @@ Por padrão a página inteira é monitorada, o que gera avisos por mudanças que
 
 Também dá para usar **Escolher na página** dentro do formulário (abre o site numa aba). O seletor CSS continua editável em **Avançado**. O seletor é gerado preferindo `id` e atributos estáveis (`data-testid`…) e evitando classes geradas automaticamente ou de estado.
 
+### Sites que pedem login ou montam a página com JavaScript (ex.: Mercado Livre)
+
+Por padrão a extensão baixa o HTML bruto do site (`fetch`), que é leve e rápido. Alguns sites não funcionam assim:
+
+- **Pedem login/verificação para acessos automáticos.** O Mercado Livre, por exemplo, troca a página do produto por "Olá! Para continuar, acesse sua conta" (`/gz/account-verification`). A extensão agora avisa isso com clareza ("o site pediu login/verificação") em vez de "seletor não encontrado".
+- **Montam o conteúdo com JavaScript** (preço, listas, notícias): o HTML bruto vem sem o texto.
+
+Para esses sites, edite o site e marque **Ler abrindo a página**. A cada verificação a extensão:
+
+1. abre o site numa **janela minimizada** (usando os cookies e o login do seu navegador, e rodando o JavaScript da página);
+2. espera carregar e o trecho aparecer e parar de mudar (até ~10 s);
+3. lê o texto visível do trecho (ou da página inteira) e **fecha a janela** — sempre, mesmo se der erro.
+
+Dicas:
+- Se o site pedir login, entre na sua conta normalmente no navegador; a janela minimizada usa a mesma sessão.
+- Use **Testar** depois de marcar a opção: ele lê do mesmo jeito que a monitoração.
+- É mais pesado que o modo padrão e uma janela pode aparecer rapidamente na barra de tarefas: prefira intervalos de **15 min ou mais** (também evita que o site bloqueie por excesso de acessos).
+- Com essa opção, o seletor visual fica totalmente coerente: o que você escolhe na página montada é exatamente o que a extensão lê.
+- Trocar o modo de leitura recomeça a versão base (o texto lido muda de formato).
+
 ### Idioma e formato de hora
 
 Em **Opções → Configurações**:
@@ -115,11 +135,11 @@ _locales/       dicionários pt_BR e en_US (messages.json) — fonte única de t
 - **Erros:** falhas (fora do ar, timeout de 30 s, 403, 404…) nunca apagam a versão base; há aviso após 3 falhas seguidas.
 
 ### Permissões
-`storage`, `alarms`, `notifications`, `offscreen`, `activeTab` e `scripting`. O `activeTab` lê a URL/título da aba atual quando você clica em “Adicionar esta página”; juntos, `activeTab` e `scripting` injetam o seletor visual **somente** na aba em que você clica em “Escolher parte da página” (nada é injetado automaticamente em sites). Acesso a sites: somente os cadastrados, sob demanda.
+`storage`, `alarms`, `notifications`, `offscreen`, `activeTab` e `scripting`. Nos sites com **Ler abrindo a página**, o `scripting` também lê o texto da janela minimizada que a extensão abre (com a permissão daquele site). O `activeTab` lê a URL/título da aba atual quando você clica em “Adicionar esta página”; juntos, `activeTab` e `scripting` injetam o seletor visual **somente** na aba em que você clica em “Escolher parte da página” (nada é injetado automaticamente em sites). Acesso a sites: somente os cadastrados, sob demanda.
 
 ## Limitações conhecidas
 
-- Sites que renderizam tudo com JavaScript (SPAs) devolvem pouco HTML no `fetch`; o conteúdo pode não aparecer. Uma melhoria futura seria abrir a aba em segundo plano.
+- Sites que renderizam tudo com JavaScript (SPAs) ou pedem login/verificação não funcionam no modo padrão (`fetch`); use **Ler abrindo a página**. Nesse modo a verificação é mais lenta, abre uma janela minimizada e depende de o site não bloquear acessos frequentes; sites com captcha a cada visita continuam sem funcionar.
 - As verificações só ocorrem com o navegador aberto (as atrasadas rodam ao abrir) e o intervalo efetivo mínimo é de ~1 minuto.
 - Sites com proteção anti-bot/captcha ou que exigem cabeçalhos especiais podem responder 403.
 - O seletor visual enxerga a página já montada, mas a extensão busca o HTML bruto (`fetch`). Em sites que montam o conteúdo com JavaScript, o trecho escolhido pode não existir no HTML bruto; o teste ao salvar avisa, mas a monitoração desses sites pode não funcionar.

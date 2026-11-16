@@ -1,6 +1,8 @@
 import { diffLines } from '../utils/diff';
 import { errorText, loadI18n } from '../utils/i18n';
 import { sha256Hex } from '../utils/hash';
+import { isLoginRedirect, readRenderedText, shortUrl, TAB_LOAD_TIMEOUT_MS, TAB_SETTLE_MS, type RenderedRead } from '../utils/page-reader';
+import { waitTabComplete } from '../utils/picker-launch';
 import { singleFlight } from '../utils/single-flight';
 import { normalizeText } from '../utils/normalize';
 import { hasHostPermission } from '../utils/permissions';
@@ -8,7 +10,7 @@ import { getSettings, getSite, updateSite } from '../utils/storage';
 import { computeNextRun, isDnd } from '../utils/time';
 import {
   FAILURES_BEFORE_ALERT, MAX_DIFF_LINES, MAX_HISTORY,
-  type CheckResult, type ErrorInfo, type OffscreenRequest, type OffscreenResponse, type Site, type TestSelectorResponse,
+  type CheckResult, type ErrorInfo, type OffscreenRequest, type OffscreenResponse, type ReadMode, type Site, type TestSelectorResponse,
 } from '../utils/types';
 
 const FETCH_TIMEOUT_MS = 30_000;
@@ -23,6 +25,7 @@ async function fetchHtml(site: Pick<Site, 'url'>): Promise<string> {
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
     const r = await fetch(site.url, { credentials: 'include', signal: ctrl.signal, cache: 'no-store' });
+    if (r.redirected && isLoginRedirect(site.url, r.url)) throw new CheckError({ key: 'errLoginRequired', params: { url: shortUrl(r.url) } });
     if (!r.ok) throw new CheckError({ key: 'errHttp', params: { status: r.status } });
     return await r.text();
   } catch (e) {
@@ -57,9 +60,39 @@ async function extractText(html: string, site: Pick<Site, 'selector' | 'ignoreVo
   return normalizeText(res.text, site.ignoreVolatile);
 }
 
-export async function testSelector(url: string, selector: string, ignoreVolatile: boolean): Promise<TestSelectorResponse> {
+async function readViaTab(site: Pick<Site, 'url' | 'selector'>): Promise<string> {
+  if (!(await hasHostPermission(site.url))) throw new CheckError({ key: 'errNoPermission' });
+  const win = await chrome.windows.create({ url: site.url, focused: false, state: 'minimized' })
+    .catch(() => chrome.windows.create({ url: site.url, focused: false })); 
   try {
-    const text = await extractText(await fetchHtml({ url }), { selector, ignoreVolatile });
+    const tabId = win?.tabs?.[0]?.id;
+    if (tabId == null) throw new CheckError({ key: 'errTabRead', params: { message: 'no tab' } });
+    await waitTabComplete(tabId, TAB_LOAD_TIMEOUT_MS);
+    let res: RenderedRead | undefined;
+    try {
+      [{ result: res }] = await chrome.scripting.executeScript({ target: { tabId }, func: readRenderedText, args: [site.selector, TAB_SETTLE_MS, 700] });
+    } catch (e) {
+      const final = (await chrome.tabs.get(tabId).catch(() => undefined))?.url;
+      if (final && isLoginRedirect(site.url, final)) throw new CheckError({ key: 'errLoginRequired', params: { url: shortUrl(final) } });
+      throw new CheckError({ key: 'errTabRead', params: { message: (e as Error).message } });
+    }
+    if (!res) throw new CheckError({ key: 'errNoAnswer' });
+    if (isLoginRedirect(site.url, res.url)) throw new CheckError({ key: 'errLoginRequired', params: { url: shortUrl(res.url) } });
+    if (!res.ok) throw new CheckError({ key: res.key });
+    return res.text;
+  } finally {
+    if (win?.id != null) await chrome.windows.remove(win.id).catch(() => undefined);
+  }
+}
+
+async function readSite(site: Pick<Site, 'url' | 'selector' | 'ignoreVolatile' | 'readMode'>): Promise<string> {
+  if (site.readMode === 'tab') return normalizeText(await readViaTab(site), site.ignoreVolatile);
+  return extractText(await fetchHtml(site), site);
+}
+
+export async function testSelector(url: string, selector: string, ignoreVolatile: boolean, readMode: ReadMode = 'fetch'): Promise<TestSelectorResponse> {
+  try {
+    const text = await readSite({ url, selector, ignoreVolatile, readMode });
     return { ok: true, text };
   } catch (e) {
     return { ok: false, error: e instanceof CheckError ? e.info : { key: 'errUnexpected', params: { message: (e as Error).message } } };
@@ -96,7 +129,7 @@ async function runCheck(id: string, manual: boolean): Promise<CheckResult> {
   let newHash: string | null = null;
   let error: ErrorInfo | null = null;
   try {
-    newText = await extractText(await fetchHtml(site), site);
+    newText = await readSite(site);
     newHash = await sha256Hex(newText);
   } catch (e) {
     error = e instanceof CheckError ? e.info : { key: 'errUnexpected', params: { message: (e as Error).message } };

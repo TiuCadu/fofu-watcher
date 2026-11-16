@@ -469,5 +469,23 @@
   },
   "confirmHistDeleteAll": {
     "message": "Excluir o histórico de TODOS os sites? Os sites continuam sendo monitorados."
+  },
+  "fReadTab": {
+    "message": "Ler abrindo a página"
+  },
+  "fReadTabHint": {
+    "message": "Para sites que pedem login/verificação (ex.: Mercado Livre) ou que montam o conteúdo com JavaScript. A cada verificação a extensão abre o site numa janela minimizada, lê o trecho e fecha. É mais pesado: prefira intervalos de 15 min ou mais."
+  },
+  "readModeTab": {
+    "message": "lendo pela página aberta"
+  },
+  "errLoginRequired": {
+    "message": "o site pediu login/verificação ({url})"
+  },
+  "errLoginRequiredHint": {
+    "message": "O site trocou a página por uma de login/verificação ({url}). Marque “Ler abrindo a página” (e entre na sua conta no navegador, se o site pedir)."
+  },
+  "errTabRead": {
+    "message": "não foi possível ler a página aberta ({message})"
   }
 }

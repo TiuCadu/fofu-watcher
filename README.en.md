@@ -36,7 +36,7 @@ npm test          # tests only
 npm run check     # typecheck + tests + build (run after every change)
 ```
 
-- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation) and `test/url.test.ts` (clickable links: http/https only), `test/history.test.ts` (which sites appear in the history and deleting changes), `test/scheduling.test.ts` (1-minute tick simulation: intervals do not drift; clicks during a running check), `test/check-result.test.ts` ("Check now" message) and `test/regressions.test.ts` (regressions in `chrome.*` code, via source scan). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
+- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation) and `test/url.test.ts` (clickable links: http/https only), `test/history.test.ts` (which sites appear in the history and deleting changes), `test/scheduling.test.ts` (1-minute tick simulation: intervals do not drift; clicks during a running check), `test/page-reader.test.ts` ("Read by opening the page": login/verification detection and reading the rendered content), `test/check-result.test.ts` ("Check now" message) and `test/regressions.test.ts` (regressions in `chrome.*` code, via source scan). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
 - Coverage: schedule (fixed times, weekdays, interval, window, window crossing midnight), "Do not disturb", text normalization, volatile-content filtering and line diff; **language and time**: 12h/24h formatting with `Intl`, 12h↔24h conversion (round trip over all 1440 minutes of the day), automatic language/format resolution, translator, **visual picker** (for every element of a sample page, the generated selector finds exactly that element; auto-generated ids/classes are ignored) and **dictionary parity** (same keys and parameters in pt-BR and en-US, no key used in code without a translation).
 - Code that depends on `chrome.*` is not unit-tested, so pure logic lives in `src/utils/`.
 - **Bug workflow:** write a failing `regressão: …` test → fix → test passes → log it in the [CHANGELOG](CHANGELOG.md), so every bug stays traceable.
@@ -78,6 +78,26 @@ By default the whole page is monitored, which triggers alerts for changes that d
 
 You can also use **Pick on the page** inside the form (it opens the site in a tab). The CSS selector remains editable under **Advanced**. The selector prefers `id` and stable attributes (`data-testid`…) and avoids auto-generated or state classes.
 
+### Sites that ask for login or build the page with JavaScript (e.g. Mercado Livre)
+
+By default the extension downloads the site's raw HTML (`fetch`), which is light and fast. Some sites do not work that way:
+
+- **They ask automated requests to log in/verify.** Mercado Livre, for example, replaces the product page with "Hello! To continue, sign in to your account" (`/gz/account-verification`). The extension now says so clearly ("the site asked for login/verification") instead of "selector not found".
+- **They build their content with JavaScript** (prices, lists, news): the raw HTML has no text.
+
+For those sites, edit the site and tick **Read by opening the page**. On every check the extension:
+
+1. opens the site in a **minimized window** (using your browser's cookies and login, and running the page's JavaScript);
+2. waits for it to load and for the part to appear and stop changing (up to ~10 s);
+3. reads the visible text of the part (or the whole page) and **closes the window** — always, even on errors.
+
+Tips:
+- If the site asks you to log in, sign in normally in the browser; the minimized window uses the same session.
+- Use **Test** after ticking the option: it reads the same way monitoring does.
+- It is heavier than the default mode and a window may briefly show in the taskbar: prefer intervals of **15 min or more** (this also keeps the site from blocking frequent visits).
+- With this option the visual picker is fully consistent: what you pick on the rendered page is exactly what the extension reads.
+- Switching the read mode restarts the baseline (the read text changes format).
+
 ### Language and time format
 
 Under **Options → Settings**:
@@ -115,11 +135,11 @@ _locales/       pt_BR and en_US dictionaries (messages.json) — single source o
 - **Errors:** failures (site down, 30 s timeout, 403, 404…) never delete the baseline; you are alerted after 3 consecutive failures.
 
 ### Permissions
-`storage`, `alarms`, `notifications`, `offscreen`, `activeTab` and `scripting`. `activeTab` reads the current tab's URL/title when you click "Add this page"; together, `activeTab` and `scripting` inject the visual picker **only** into the tab where you click "Pick part of the page" (nothing is ever injected into sites automatically). Site access: only registered sites, on demand.
+`storage`, `alarms`, `notifications`, `offscreen`, `activeTab` and `scripting`. For sites with **Read by opening the page**, `scripting` also reads the text of the minimized window the extension opens (with that site's permission). `activeTab` reads the current tab's URL/title when you click "Add this page"; together, `activeTab` and `scripting` inject the visual picker **only** into the tab where you click "Pick part of the page" (nothing is ever injected into sites automatically). Site access: only registered sites, on demand.
 
 ## Known limitations
 
-- Sites that render everything with JavaScript (SPAs) return little HTML to `fetch`; content may not appear. A future improvement would be opening the tab in the background.
+- Sites that render everything with JavaScript (SPAs) or ask for login/verification do not work in the default mode (`fetch`); use **Read by opening the page**. That mode is slower, opens a minimized window and depends on the site not blocking frequent visits; sites with a captcha on every visit still do not work.
 - Checks only run while the browser is open (late ones run on startup) and the effective minimum interval is ~1 minute.
 - Sites with anti-bot/captcha protection or special header requirements may answer 403.
 - The visual picker sees the fully rendered page, but the extension fetches the raw HTML (`fetch`). On sites that build content with JavaScript, the picked part may not exist in the raw HTML; the test on save warns you, but monitoring those sites may not work.
