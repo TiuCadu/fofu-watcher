@@ -410,6 +410,9 @@
   "selTestEmpty": {
     "message": "O trecho foi encontrado, mas está vazio no HTML que a extensão recebe."
   },
+  "selTestEmptyPage": {
+    "message": "A página inteira veio sem texto no HTML que a extensão recebe. Isso acontece em sites que montam o conteúdo com JavaScript, ou quando o site pede login/captcha ou redireciona. Nesse caso a monitoração não vai detectar mudanças."
+  },
   "selTestFail": {
     "message": "Não foi possível ler esse trecho: {error}. Em sites que montam a página com JavaScript o conteúdo pode não existir no HTML bruto, e a monitoração pode não funcionar."
   },
@@ -424,5 +427,17 @@
   },
   "pickerUnavailable": {
     "message": "Não foi possível escolher nesta página (páginas internas do navegador e a loja de extensões não permitem)."
+  },
+  "checkBaseline": {
+    "message": "Verificado: primeira leitura guardada como base (só avisa nas próximas mudanças)."
+  },
+  "checkUnchanged": {
+    "message": "Verificado agora: sem mudanças."
+  },
+  "checkChanged": {
+    "message": "Verificado agora: houve mudança!"
+  },
+  "checkFailed": {
+    "message": "Falha na verificação: {error}"
   }
 }

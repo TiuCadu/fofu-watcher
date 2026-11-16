@@ -45,6 +45,7 @@ npm run check     # typecheck + tests + build (run after every change)
 
 - **Add the open page:** click the icon → **+ Add this page** (URL and title come pre-filled).
 - **Add manually:** icon → ⚙ → **Add site**.
+- **Check now:** the button shows the result right away (first reading saved as baseline, no changes, it changed, or the error). Remember: the first check never notifies.
 - **Go to the monitored page:** in the popup and in the site list, the site name is a link (the popup also has an **Open page ↗** button); click to open the page in a new tab.
 - **Monitor only part of a page:** see “Pick the part of the page” below.
 - When saving, the browser asks for access **to that site only** (`optional_host_permissions`).

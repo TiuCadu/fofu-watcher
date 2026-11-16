@@ -1,3 +1,4 @@
+import { describeCheckResult } from '../utils/check-result';
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
 import { launchPicker } from '../utils/picker-launch';
 import { getSites } from '../utils/storage';
@@ -8,6 +9,7 @@ import type { Site } from '../utils/types';
 
 const list = document.getElementById('list')!;
 const checking = new Set<string>();
+const results = new Map<string, { text: string; isError: boolean }>();
 let I: I18n;
 
 function card(s: Site): HTMLElement {
@@ -18,10 +20,16 @@ function card(s: Site): HTMLElement {
     disabled: checking.has(s.id),
     onclick: async () => {
       checking.add(s.id);
+      results.delete(s.id);
       void render();
-      try { await chrome.runtime.sendMessage({ type: 'checkNow', id: s.id }); } finally { checking.delete(s.id); void render(); }
+      try {
+        results.set(s.id, describeCheckResult(await chrome.runtime.sendMessage({ type: 'checkNow', id: s.id }), I.t));
+      } catch (e) {
+        results.set(s.id, { text: I.t('checkFailed', { error: String(e) }), isError: true });
+      } finally { checking.delete(s.id); void render(); }
     },
   }, checking.has(s.id) ? t('checking') : t('checkNow'));
+  const res = results.get(s.id);
 
   return h('div', { class: 'card site' },
     h('div', { class: 'row' },
@@ -31,6 +39,7 @@ function card(s: Site): HTMLElement {
       h('span', {}, t('lastLabel')), h('span', {}, formatDateTime(s.lastCheck, fmt)),
       h('span', {}, t('nextLabel')), h('span', {}, s.enabled ? formatDateTime(s.nextRun, fmt) : t('paused'))),
     s.status === 'error' && s.lastError ? h('div', { class: 'err' }, t('errorWithCount', { error: errorText(t, s.lastError), count: s.failures })) : null,
+    res ? h('div', { class: `result${res.isError ? ' err' : ''}`, role: 'status' }, res.text) : null,
     h('div', { class: 'actions' },
       btn,
       isHttpUrl(s.url) ? h('button', { class: 'small', title: t('openSiteTitle', { url: s.url }), onclick: () => chrome.tabs.create({ url: s.url }) }, `${t('openSite')} ↗`) : null,

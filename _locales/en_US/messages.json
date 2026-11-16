@@ -410,6 +410,9 @@
   "selTestEmpty": {
     "message": "The part was found but is empty in the HTML the extension receives."
   },
+  "selTestEmptyPage": {
+    "message": "The whole page came back with no text in the HTML the extension receives. This happens on sites that build their content with JavaScript, or when the site asks for login/captcha or redirects. In that case monitoring will not detect changes."
+  },
   "selTestFail": {
     "message": "Could not read that part: {error}. On sites that build the page with JavaScript the content may not exist in the raw HTML, and monitoring may not work."
   },
@@ -424,5 +427,17 @@
   },
   "pickerUnavailable": {
     "message": "Cannot pick on this page (browser internal pages and the extension store do not allow it)."
+  },
+  "checkBaseline": {
+    "message": "Checked: first reading saved as the baseline (you will be alerted on later changes)."
+  },
+  "checkUnchanged": {
+    "message": "Checked just now: no changes."
+  },
+  "checkChanged": {
+    "message": "Checked just now: it changed!"
+  },
+  "checkFailed": {
+    "message": "Check failed: {error}"
   }
 }

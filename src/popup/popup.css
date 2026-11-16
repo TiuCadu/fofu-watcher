@@ -7,4 +7,5 @@ header h1 { font-size: 16px; }
 .site .title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .site .meta { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; margin: 6px 0; }
 .site .err { color: var(--error); font-size: 12px; margin-bottom: 6px; }
+.site .result { font-size: 12px; margin-bottom: 6px; }
 .site .actions { display: flex; gap: 6px; }

@@ -2,6 +2,14 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.3.2] — Retorno visível em "Verificar agora"
+### Corrigido
+- **Verificar agora** parecia não fazer nada: sem mudança não havia nenhum sinal na tela (o "Última verificação" não mostra segundos), e falhas do service worker eram ignoradas. Agora o popup e a lista de opções mostram o resultado de cada verificação manual: "primeira leitura guardada como base", "sem mudanças", "houve mudança!" ou "falha: …". O botão fica desabilitado como "Verificando…" enquanto roda. Testes: `regressão: "Verificar agora" sempre devolve um texto` e `regressão: resposta ausente ou falha do worker não é ignorada` (`test/check-result.test.ts`).
+
+## [1.3.1] — Correção da mensagem do teste
+### Corrigido
+- No formulário, **Testar** com a página inteira (sem seletor) e texto vazio dizia "O trecho foi encontrado, mas está vazio", o que confundia. Agora explica que a página inteira veio sem texto no HTML recebido (site montado com JavaScript, login/captcha ou redirecionamento) e que a monitoração não detectaria mudanças. A mensagem antiga continua só para quando há seletor. (Código de interface com `chrome.*`, sem teste unitário; a paridade das novas chaves pt/en é coberta pelo teste de dicionários.)
+
 ## [1.3.0] — Link para a página monitorada
 ### Adicionado
 - O nome do site no popup e na lista de sites (opções) agora é um **link clicável** que abre a página monitorada numa nova aba; na lista de opções a URL também é link.

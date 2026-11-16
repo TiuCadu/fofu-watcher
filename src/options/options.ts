@@ -1,3 +1,4 @@
+import { describeCheckResult } from '../utils/check-result';
 import { applyI18n, errorText, loadI18n, type I18n } from '../utils/i18n';
 import { hasHostPermission, originPattern } from '../utils/permissions';
 import { launchPicker, waitTabComplete } from '../utils/picker-launch';
@@ -27,6 +28,20 @@ function showTab(name: string): void {
 }
 document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab!)));
 
+const checking = new Set<string>();
+const results = new Map<string, { text: string; isError: boolean }>();
+
+async function checkNow(id: string): Promise<void> {
+  checking.add(id);
+  results.delete(id);
+  void renderSites();
+  try {
+    results.set(id, describeCheckResult(await chrome.runtime.sendMessage({ type: 'checkNow', id }), t));
+  } catch (e) {
+    results.set(id, { text: t('checkFailed', { error: String(e) }), isError: true });
+  } finally { checking.delete(id); void renderSites(); }
+}
+
 async function renderSites(): Promise<void> {
   const sites = await getSites();
   const box = $('sites');
@@ -46,8 +61,9 @@ async function renderSites(): Promise<void> {
         h('span', {}, t('lastLabel')), h('span', {}, formatDateTime(s.lastCheck, I.fmt))),
       s.lastError ? h('div', { class: 'error-text' }, t('siteErrorFails', { error: errorText(t, s.lastError), count: s.failures })) : null,
       !permOk ? h('div', { class: 'error-text' }, t('noPermission')) : null,
+      results.has(s.id) ? h('div', { class: results.get(s.id)!.isError ? 'error-text' : 'muted', role: 'status' }, results.get(s.id)!.text) : null,
       h('div', { class: 'row wrap' },
-        h('button', { class: 'small', onclick: () => void chrome.runtime.sendMessage({ type: 'checkNow', id: s.id }) }, t('checkNow')),
+        h('button', { class: 'small', disabled: checking.has(s.id), onclick: () => void checkNow(s.id) }, checking.has(s.id) ? t('checking') : t('checkNow')),
         h('button', { class: 'small', onclick: () => openForm(s) }, t('btnEdit')),
         h('button', { class: 'small', onclick: () => void toggle(s) }, s.enabled ? t('btnPause') : t('btnActivate')),
         h('button', { class: 'small danger', onclick: () => void remove(s) }, t('btnRemove'))),
@@ -198,7 +214,7 @@ $('btn-test-sel').addEventListener('click', async () => {
   showSelPreview(t('selTesting'));
   const r = await askTest(url);
   if (!r.ok) showSelPreview(t('selTestFail', { error: errorText(t, r.error) }), true);
-  else if (!r.text.trim()) showSelPreview(t('selTestEmpty'), true);
+  else if (!r.text.trim()) showSelPreview(t(selInput().value.trim() ? 'selTestEmpty' : 'selTestEmptyPage'), true);
   else showSelPreview(t('selTestOk', { text: r.text.replace(/\s+/g, ' ').slice(0, 300) }));
 });
 

@@ -7,7 +7,7 @@ import { getSettings, getSite, updateSite } from '../utils/storage';
 import { computeNextRun, isDnd } from '../utils/time';
 import {
   FAILURES_BEFORE_ALERT, MAX_DIFF_LINES, MAX_HISTORY,
-  type ErrorInfo, type OffscreenRequest, type OffscreenResponse, type Site, type TestSelectorResponse,
+  type CheckResult, type ErrorInfo, type OffscreenRequest, type OffscreenResponse, type Site, type TestSelectorResponse,
 } from '../utils/types';
 
 const FETCH_TIMEOUT_MS = 30_000;
@@ -84,9 +84,9 @@ async function notify(site: Site, kind: 'changed' | 'error'): Promise<void> {
   });
 }
 
-export async function checkSite(id: string, manual = false): Promise<void> {
+export async function checkSite(id: string, manual = false): Promise<CheckResult> {
   const site = await getSite(id);
-  if (!site) return;
+  if (!site) return { outcome: 'error', error: { key: 'errUnexpected', params: { message: 'site not found' } } };
 
   let newText: string | null = null;
   let newHash: string | null = null;
@@ -100,6 +100,7 @@ export async function checkSite(id: string, manual = false): Promise<void> {
 
   let changed = false;
   let failureAlert = false;
+  let firstRun = false;
   const updated = await updateSite(id, (s) => {
     const now = Date.now();
     s.lastCheck = now;
@@ -119,6 +120,7 @@ export async function checkSite(id: string, manual = false): Promise<void> {
       s.baseText = newText;
       s.baseHash = newHash;
       s.status = 'ok';
+      firstRun = true;
     } else if (s.baseHash !== newHash) {
       const diff = diffLines(s.baseText.split('\n'), newText!.split('\n'));
       s.history.unshift({ ts: now, diff: diff.slice(0, MAX_DIFF_LINES), omitted: Math.max(0, diff.length - MAX_DIFF_LINES) });
@@ -133,7 +135,9 @@ export async function checkSite(id: string, manual = false): Promise<void> {
     }
   });
 
-  if (!updated) return;
+  if (!updated) return { outcome: 'error', error: { key: 'errUnexpected', params: { message: 'site removed' } } };
   if (changed) await notify(updated, 'changed');
   else if (failureAlert) await notify(updated, 'error');
+  if (error !== null) return { outcome: 'error', error };
+  return { outcome: changed ? 'changed' : firstRun ? 'baseline' : 'unchanged' };
 }

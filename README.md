@@ -45,6 +45,7 @@ npm run check     # typecheck + testes + build (rode a cada alteração)
 
 - **Adicionar uma página aberta:** clique no ícone → **+ Adicionar esta página** (a URL e o título já vêm preenchidos).
 - **Adicionar manualmente:** ícone → ⚙ → **Adicionar site**.
+- **Verificar agora:** o botão mostra o resultado na hora (primeira leitura guardada como base, sem mudanças, houve mudança ou o erro). Lembre: a primeira verificação nunca notifica.
 - **Ir para a página monitorada:** no popup e na lista de sites, o nome do site é um link (e há o botão **Abrir página ↗** no popup); clique para abrir a página numa nova aba.
 - **Monitorar só uma parte da página:** veja “Escolher a parte da página” abaixo.
 - Ao salvar, o navegador pede permissão de acesso **apenas àquele site** (`optional_host_permissions`).

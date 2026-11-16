@@ -78,6 +78,10 @@ export type BgMessage =
   | { type: 'testSelector'; url: string; selector: string; ignoreVolatile: boolean }
   | { type: 'pickerResult'; selector: string; preview: string; url: string; title: string; editId?: string };
 
+export type CheckOutcome = 'baseline' | 'unchanged' | 'changed' | 'error';
+export interface CheckResult { outcome: CheckOutcome; error?: ErrorInfo | string | null }
+export type CheckNowResponse = { ok: true; result: CheckResult } | { ok: false; error: string };
+
 export type TestSelectorResponse = { ok: true; text: string } | { ok: false; error: ErrorInfo };
 
 export interface OffscreenRequest {

@@ -1,5 +1,5 @@
 import { getSites } from '../utils/storage';
-import type { BgMessage } from '../utils/types';
+import type { BgMessage, CheckNowResponse } from '../utils/types';
 import { checkSite, testSelector } from './checker';
 import { ensureAlarm, runDue, TICK_ALARM } from './scheduler';
 
@@ -46,10 +46,15 @@ chrome.runtime.onMessage.addListener((msg: BgMessage & { target?: string }, _sen
     return true; 
   }
   if (msg?.type === 'pickerResult') { void openOptionsWith(msg); return; }
-  const job = msg?.type === 'checkNow' ? checkSite(msg.id, true) : msg?.type === 'checkDue' ? runDue() : null;
-  if (!job) return;
-  job.then(() => sendResponse({ ok: true }), (e) => sendResponse({ ok: false, error: String(e) }));
-  return true; 
+  if (msg?.type === 'checkNow') {
+    checkSite(msg.id, true).then((result) => sendResponse({ ok: true, result } satisfies CheckNowResponse),
+      (e) => sendResponse({ ok: false, error: String(e) } satisfies CheckNowResponse));
+    return true; 
+  }
+  if (msg?.type === 'checkDue') {
+    runDue().then(() => sendResponse({ ok: true }), (e) => sendResponse({ ok: false, error: String(e) }));
+    return true;
+  }
 });
 
 const openDiff = (id: string) => chrome.tabs.create({ url: chrome.runtime.getURL(`diff/diff.html?site=${encodeURIComponent(id)}`) });
