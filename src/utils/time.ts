@@ -10,6 +10,12 @@ export const parseHM = (s: string): number => {
 export const isValidHM = (s: unknown): s is string =>
   typeof s === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
 
+export function fixedTimes(added: string[], picked: string, pickedTouched: boolean): string[] {
+  const all = added.filter(isValidHM);
+  if (pickedTouched && isValidHM(picked)) all.push(picked);
+  return [...new Set(all)].sort();
+}
+
 function at(base: Date, minutes: number, dayOffset = 0): Date {
   const d = new Date(base);
   d.setHours(0, 0, 0, 0);

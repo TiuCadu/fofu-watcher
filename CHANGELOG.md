@@ -2,6 +2,11 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.6.2] — Agenda com vários horários
+### Corrigido
+- **Depois de salvar, o card do site continuava mostrando a agenda antiga** (ex.: "Às 09:00" mesmo com 09:00 e 17:00 gravados). A gravação estava certa, mas a lista só se redesenha pelo `storage.onChanged`, que é ignorado com o formulário aberto, e o evento da gravação chega antes de o formulário fechar. Na edição nenhuma verificação roda logo em seguida, então nada redesenhava a lista até recarregar a página. Agora fechar o formulário redesenha a lista. Teste: `regressão: depois de salvar, o card do site mostra a agenda nova (ex.: 09:00 e 17:00)` (`test/regressions.test.ts`). Reproduzido e verificado no navegador real (Edge headless, perfil temporário): antes, storage `["09:00","17:00"]` e card "Às 09:00"; depois, card "Às 09:00, 17:00" com a próxima verificação às 17:00.
+- **Na agenda por horário fixo, o 2º horário (ex.: 17:00) sumia ao salvar.** O horário escolhido no seletor só entrava na lista ao clicar em "Adicionar"; quem escolhia 17:00 e clicava direto em Salvar ficava só com o 09:00, sem nenhum aviso. Agora o horário escolhido e ainda não adicionado também é salvo (e já aparece na prévia "Próxima verificação"); se o seletor não foi mexido, nada é acrescentado (remover o último horário continua pedindo um horário). `fixedTimes` em `src/utils/time.ts`. Teste: `regressão: horário escolhido sem clicar em "Adicionar" é salvo junto com os já adicionados` (`test/utils.test.ts`).
+
 ## [1.6.1] — Salvar não duplica mais
 ### Corrigido
 - **Clicar várias vezes em Salvar criava sites duplicados.** O salvamento espera a permissão do site e, às vezes, o teste do trecho (10–20 s lendo pela página aberta); nesse tempo cada clique extra (ou Enter) gravava o site de novo com outro id. Agora: (1) o botão fica desabilitado como "Salvando…" e cliques extras são ignorados; (2) o id do site novo é gerado uma vez, ao abrir o formulário, e a gravação é um *upsert* pelo id (`upsertSite`, `src/utils/site-list.ts`) — salvar de novo atualiza o mesmo site. Teste: `regressão: clicar em Salvar várias vezes no mesmo formulário não duplica o site` (`test/site-list.test.ts`). Verificado no navegador real com cliques de mouse reais: 3 cliques + Enter durante um salvamento lento = 1 site.

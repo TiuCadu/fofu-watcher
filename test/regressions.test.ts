@@ -23,4 +23,9 @@ t('regressão: falha ao notificar não derruba a verificação (o resultado cont
   assert.match(src, /await notify\(updated, 'error'\)\.catch\(/, 'notify(error) precisa de .catch');
 });
 
+t('regressão: depois de salvar, o card do site mostra a agenda nova (ex.: 09:00 e 17:00)', () => {
+  const src = fs.readFileSync('src/options/options.ts', 'utf8');
+  assert.match(src, /dlg\.addEventListener\(\s*'close'\s*,[^\n]*renderSites\(\)/, 'o "close" do formulário precisa chamar renderSites()');
+});
+
 console.log(`${n} testes de regressão passaram.`);

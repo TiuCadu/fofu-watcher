@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { diffLines } from '../src/utils/diff';
 import { normalizeText } from '../src/utils/normalize';
-import { computeNextRun, inWindow, isDnd } from '../src/utils/time';
+import { computeNextRun, fixedTimes, inWindow, isDnd } from '../src/utils/time';
 
 const D = (s: string) => new Date(s); 
 const iso = (ms: number) => { const d = new Date(ms); const p = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
@@ -20,6 +20,21 @@ t('fixed: respeita dias da semana (só seg/sex)', () => {
   const s = { mode: 'fixed', times: ['08:00'], days: [1, 5] } as const;
   assert.equal(iso(computeNextRun(s, D('2026-03-04T10:00:00'))), '2026-03-06 08:00'); 
   assert.equal(iso(computeNextRun(s, D('2026-03-06T09:00:00'))), '2026-03-09 08:00'); 
+});
+t('regressão: horário escolhido sem clicar em "Adicionar" é salvo junto com os já adicionados', () => {
+  assert.deepEqual(fixedTimes(['09:00'], '17:00', true), ['09:00', '17:00']);
+});
+t('fixedTimes: seletor não mexido não acrescenta horário', () => {
+  assert.deepEqual(fixedTimes(['09:00'], '12:00', false), ['09:00']);
+});
+t('fixedTimes: só o seletor mexido (sem nenhum adicionado) já vale; sem mexer, lista vazia continua vazia', () => {
+  assert.deepEqual(fixedTimes([], '17:00', true), ['17:00']);
+  assert.deepEqual(fixedTimes([], '09:00', false), []); 
+});
+t('fixedTimes: sem duplicar, ordenado e ignorando valor inválido', () => {
+  assert.deepEqual(fixedTimes(['17:00', '09:00'], '09:00', true), ['09:00', '17:00']);
+  assert.deepEqual(fixedTimes(['17:00'], '25:00', true), ['17:00']);
+  assert.deepEqual(fixedTimes([], 'x', true), []);
 });
 t('interval: soma o intervalo', () => {
   const s = { mode: 'interval', everyMinutes: 30, windowStart: null, windowEnd: null } as const;

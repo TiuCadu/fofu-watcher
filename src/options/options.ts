@@ -5,7 +5,7 @@ import { upsertSite } from '../utils/site-list';
 import { hasHostPermission, originPattern } from '../utils/permissions';
 import { launchPicker, waitTabComplete } from '../utils/picker-launch';
 import { DEFAULT_SETTINGS, getSettings, getSites, mutateSites, saveSettings, updateSite } from '../utils/storage';
-import { computeNextRun, describeSchedule, formatDateTime, formatHM, isValidHM, weekdayShort } from '../utils/time';
+import { computeNextRun, describeSchedule, fixedTimes, formatDateTime, formatHM, isValidHM, weekdayShort } from '../utils/time';
 import { mountTimePicker, type TimePicker } from '../utils/timepicker';
 import { clear, h, hostOf, renderHistory, siteLink, statusInfo } from '../utils/ui';
 import type { ErrorInfo, HourFormatPref, LanguagePref, ReadMode, Schedule, Settings, Site, TestSelectorResponse } from '../utils/types';
@@ -101,6 +101,7 @@ const form = $<HTMLFormElement>('form');
 let editing: Site | null = null;
 let draftId = '';
 let times: string[] = []; 
+let timeTouched = false;
 
 const daysBox = $('days');
 const dayInputs = () => [...daysBox.querySelectorAll<HTMLInputElement>('input')];
@@ -123,8 +124,9 @@ function renderChips(): void {
 
 function readSchedule(): Schedule | { error: string } {
   if (mode() === 'fixed') {
-    if (!times.length) return { error: 'errNeedTime' };
-    return { mode: 'fixed', times: [...times].sort(), days: dayInputs().filter((i) => i.checked).map((i) => Number(i.dataset.d)) };
+    const all = fixedTimes(times, pv('f-time'), timeTouched);
+    if (!all.length) return { error: 'errNeedTime' };
+    return { mode: 'fixed', times: all, days: dayInputs().filter((i) => i.checked).map((i) => Number(i.dataset.d)) };
   }
   const every = Math.round(Number($<HTMLInputElement>('f-every').value) * Number($<HTMLSelectElement>('f-unit').value));
   if (!(every >= 1)) return { error: 'errInterval' };
@@ -163,6 +165,7 @@ function openForm(site?: Site, preset?: { url?: string; name?: string; selector?
   const sc = site?.schedule;
   form.querySelector<HTMLInputElement>(`input[name="mode"][value="${sc?.mode ?? 'fixed'}"]`)!.checked = true;
   times = sc?.mode === 'fixed' ? [...sc.times] : [];
+  timeTouched = false;
   renderDays(sc?.mode === 'fixed' ? sc.days : []);
   const every = sc?.mode === 'interval' ? sc.everyMinutes : 30;
   const hours = every >= 60 && every % 60 === 0;
@@ -181,9 +184,13 @@ form.addEventListener('input', updatePreview);
 form.addEventListener('change', updatePreview);
 $('btn-add-time').addEventListener('click', () => {
   const v = pv('f-time');
-  if (isValidHM(v) && !times.includes(v)) { times.push(v); renderChips(); updatePreview(); }
+  if (isValidHM(v) && !times.includes(v)) times.push(v);
+  timeTouched = false;
+  renderChips(); updatePreview();
 });
+$('f-time').addEventListener('change', () => { timeTouched = true; });
 $('btn-cancel').addEventListener('click', () => dlg.close());
+dlg.addEventListener('close', () => void renderSites());
 $('btn-new').addEventListener('click', () => openForm());
 
 const selInput = () => $<HTMLInputElement>('f-selector');
