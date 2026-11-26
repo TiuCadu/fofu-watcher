@@ -16,8 +16,6 @@ npm install
 npm run build      # gera a pasta dist/
 ```
 
-O repositório é privado: para clonar, sua conta do GitHub precisa ter acesso a ele.
-
 **Chrome**
 1. Abra `chrome://extensions`.
 2. Ative **Modo do desenvolvedor** (canto superior direito).
@@ -34,7 +32,7 @@ Depois de alterar o código: `npm run build` e clique em **Recarregar** (↻) na
 
 ## Repositório e fluxo de trabalho
 
-- **GitHub:** [TiuCadu/fofu-watcher](https://github.com/TiuCadu/fofu-watcher) (privado). A branch principal é a `main`.
+- **GitHub:** [TiuCadu/fofu-watcher](https://github.com/TiuCadu/fofu-watcher). A branch principal é a `main`.
 - **Commits:** mensagem em português, no presente (`Adiciona …`, `Corrige …`), com a versão entre parênteses quando houver (ex.: `Corrige … (v1.6.2)`). Mudanças visíveis ao usuário entram no [CHANGELOG](CHANGELOG.md).
 - **Finais de linha:** o `.gitattributes` fixa LF em todos os arquivos, inclusive no Windows.
 - **Não versionados:** `node_modules/`, `dist/` (gerado pelo build) e `.llm/` (rascunhos locais).
@@ -156,3 +154,9 @@ _locales/       dicionários pt_BR e en_US (messages.json) — fonte única de t
 - Após importar um backup é preciso conceder novamente as permissões dos sites (exigência do navegador).
 - O diff é por linhas, sem destaque dentro da linha; em páginas enormes usa uma comparação por conjunto (sem ordem).
 - Notificações dependem das configurações do sistema operacional (Foco/Não perturbe do SO também as silenciam).
+- Só há português (Brasil) e inglês (EUA); para outros idiomas do navegador, o nome e a descrição da extensão exibidos pelo navegador/loja caem no português.
+- A ordem da data segue o idioma escolhido (ex.: `04/03/2026` em pt-BR e `03/04/2026` em en-US).
+
+## Licença
+
+[MIT](LICENSE): pode usar, copiar, modificar e distribuir à vontade, mantendo o aviso de copyright.
