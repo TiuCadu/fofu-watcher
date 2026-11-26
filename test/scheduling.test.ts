@@ -47,7 +47,7 @@ await t('horário fixo não roda adiantado (18:00 não dispara às 17:59:40)', (
 await t('janela do intervalo não abre adiantada (próxima às 08:00 não roda às 07:59:40)', () => {
   const sch = interval(30, '08:00', '20:00');
   const lastCheck = new Date(2026, 0, 5, 19, 50).getTime();
-  const nextRun = computeNextRun(sch, new Date(lastCheck)); 
+  const nextRun = computeNextRun(sch, new Date(lastCheck));
   assert.equal(new Date(nextRun).getHours(), 8);
   const s = { enabled: true, schedule: sch, nextRun, lastCheck };
   assert.ok(!isDue(s, nextRun - 20_000), 'salto de janela não usa folga');
@@ -62,8 +62,8 @@ await t('regressão: clique durante uma verificação em andamento recebe o MESM
   let release!: () => void;
   const gate = new Promise<void>((r) => { release = r; });
   const run = singleFlight(async (id: string) => { calls++; await gate; return `mudou:${id}`; });
-  const auto = run('a');      
-  const manual = run('a');    
+  const auto = run('a');
+  const manual = run('a');
   release();
   assert.equal(await auto, 'mudou:a');
   assert.equal(await manual, 'mudou:a', 'o clique não pode ver "sem mudanças" por ter rodado depois');

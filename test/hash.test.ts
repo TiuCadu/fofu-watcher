@@ -20,7 +20,7 @@ await t('sha256Hex: texto com acentos e emoji é codificado em UTF-8 (igual ao n
 await t('sha256Hex: textos diferentes geram impressões diferentes; o mesmo texto, a mesma', async () => {
   assert.equal(await sha256Hex('mesmo texto'), await sha256Hex('mesmo texto'));
   assert.notEqual(await sha256Hex('R$ 10'), await sha256Hex('R$ 11'));
-  assert.notEqual(await sha256Hex('a'), await sha256Hex('a ')); 
+  assert.notEqual(await sha256Hex('a'), await sha256Hex('a '));
 });
 
 console.log(`${n} testes ok`);

@@ -81,7 +81,7 @@ async function renderSites(): Promise<void> {
 async function toggle(s: Site): Promise<void> {
   await updateSite(s.id, (x) => {
     x.enabled = !x.enabled;
-    if (x.enabled) x.nextRun = Date.now(); 
+    if (x.enabled) x.nextRun = Date.now();
   });
   if (!s.enabled) void chrome.runtime.sendMessage({ type: 'checkDue' });
 }
@@ -100,7 +100,7 @@ const dlg = $<HTMLDialogElement>('dlg');
 const form = $<HTMLFormElement>('form');
 let editing: Site | null = null;
 let draftId = '';
-let times: string[] = []; 
+let times: string[] = [];
 let timeTouched = false;
 
 const daysBox = $('days');
@@ -308,7 +308,7 @@ async function saveForm(): Promise<void> {
     await mutateSites((sites) => {
       upsertSite(sites, {
         id: draftId, url, name, selector, ignoreVolatile, readMode, clickBefore, enabled: true, schedule,
-        nextRun: Date.now(), 
+        nextRun: Date.now(),
         lastCheck: null, status: 'pending', unseen: false, failures: 0, lastError: null,
         baseText: null, baseHash: null, history: [],
       });
@@ -470,7 +470,7 @@ async function refreshI18n(): Promise<void> {
   const prev = I;
   I = await loadI18n();
   applyI18n(I);
-  if (prev && prev.lang === I.lang && prev.hour12 === I.hour12) return; 
+  if (prev && prev.lang === I.lang && prev.hour12 === I.hour12) return;
   remountPickers();
   renderDays();
   renderChips();

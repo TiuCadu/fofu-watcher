@@ -50,7 +50,7 @@ export async function readRenderedText(selector: string, waitMs: number, stepMs 
       const button = findButton();
       if (button) { button.click(); break; }
       const already = selector ? read() : null;
-      if (already !== null && already !== INVALID && already.trim() !== '') break; 
+      if (already !== null && already !== INVALID && already.trim() !== '') break;
       if (Date.now() >= clickDeadline) break;
       await sleep(stepMs);
     }

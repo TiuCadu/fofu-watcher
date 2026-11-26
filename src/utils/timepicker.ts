@@ -15,7 +15,7 @@ export function mountTimePicker(host: HTMLElement, value: string, hour12: boolea
 
   const sel = (label: string, opts: [string, string][], onInput: (v: string) => void) => {
     const s = h('select', { 'aria-label': label, class: 'tp-sel' }, ...opts.map(([v, text]) => h('option', { value: v }, text)));
-    s.addEventListener('change', () => onInput(s.value)); 
+    s.addEventListener('change', () => onInput(s.value));
     return s;
   };
 

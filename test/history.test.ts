@@ -45,8 +45,8 @@ t('excluir todas as selecionadas uma a uma também zera o "não visto"', () => {
 
 t('regressão: exclui pela data (ts), não pelo índice, mesmo se uma mudança nova entrou no topo', () => {
   const s = site('a', [20, 10]);
-  const chosen = new Set([10]); 
-  s.history.unshift(entry(30)); 
+  const chosen = new Set([10]);
+  s.history.unshift(entry(30));
   deleteHistory(s, chosen);
   assert.deepEqual(s.history.map((e) => e.ts), [30, 20]);
 });

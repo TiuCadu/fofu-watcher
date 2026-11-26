@@ -61,7 +61,7 @@ export function buildSelector(el: SelNode, count: (selector: string) => number):
     segs.unshift(anchor ?? segmentFor(node));
     const sel = segs.join(' > ');
     if (count(sel) === 1) return sel;
-    if (anchor) break; 
+    if (anchor) break;
     node = node.parentElement;
   }
   return segs.join(' > ');

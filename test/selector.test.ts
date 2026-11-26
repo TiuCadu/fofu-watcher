@@ -74,7 +74,7 @@ t('id estável vence tudo', () => {
   assert.equal(buildSelector(hero, count), '#hero');
 });
 t('id gerado automaticamente é ignorado', () => {
-  const el = root.children[1].children[4]; 
+  const el = root.children[1].children[4];
   const sel = buildSelector(el, count);
   assert.ok(!sel.includes('react-12345'), sel);
   assert.deepEqual(query(root, sel), [el]);

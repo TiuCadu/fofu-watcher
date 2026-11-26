@@ -14,7 +14,7 @@ const site = (id: string, name = id): Site => ({
 
 t('regressão: clicar em Salvar várias vezes no mesmo formulário não duplica o site', () => {
   const sites: Site[] = [site('outro')];
-  const draft = 'id-do-formulario'; 
+  const draft = 'id-do-formulario';
   upsertSite(sites, site(draft, 'Produto'));
   upsertSite(sites, site(draft, 'Produto'));
   upsertSite(sites, site(draft, 'Produto'));

@@ -37,7 +37,7 @@ t('resumo da regra: formato de hora independe do idioma', () => {
 
 t('formatHM: 24h e 12h, inclusive meia-noite e meio-dia', () => {
   assert.equal(formatHM('18:00', F.pt24), '18:00');
-  assert.equal(formatHM('00:05', F.pt24), '00:05'); 
+  assert.equal(formatHM('00:05', F.pt24), '00:05');
   assert.equal(norm(formatHM('18:00', F.en12)), '6:00 PM');
   assert.equal(norm(formatHM('00:00', F.en12)), '12:00 AM');
   assert.equal(norm(formatHM('12:30', F.en12)), '12:30 PM');
@@ -75,7 +75,7 @@ t('resolveLanguage: auto segue o navegador; manual vence', () => {
   assert.equal(resolveLanguage('auto', 'en-GB'), 'en-US');
   assert.equal(resolveLanguage('auto', 'en'), 'en-US');
   assert.equal(resolveLanguage('auto', 'pt-PT'), 'pt-BR');
-  assert.equal(resolveLanguage('auto', 'es'), 'pt-BR'); 
+  assert.equal(resolveLanguage('auto', 'es'), 'pt-BR');
   assert.equal(resolveLanguage('pt-BR', 'en-US'), 'pt-BR');
   assert.equal(resolveLanguage('en-US', 'pt-BR'), 'en-US');
 });

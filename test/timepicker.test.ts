@@ -87,9 +87,9 @@ t('12h: escolher hora/minuto/período converte para 24h', () => {
   ampm!.choose('PM');
   assert.equal(tp.get(), '21:05');
   hour.choose('12');
-  assert.equal(tp.get(), '12:05'); 
+  assert.equal(tp.get(), '12:05');
   ampm!.choose('AM');
-  assert.equal(tp.get(), '00:05'); 
+  assert.equal(tp.get(), '00:05');
   min.choose('59');
   assert.equal(tp.get(), '00:59');
 });

@@ -63,7 +63,7 @@ async function extractText(html: string, site: Pick<Site, 'selector' | 'ignoreVo
 async function readViaTab(site: Pick<Site, 'url' | 'selector' | 'clickBefore'>): Promise<string> {
   if (!(await hasHostPermission(site.url))) throw new CheckError({ key: 'errNoPermission' });
   const win = await chrome.windows.create({ url: site.url, focused: false, state: 'minimized' })
-    .catch(() => chrome.windows.create({ url: site.url, focused: false })); 
+    .catch(() => chrome.windows.create({ url: site.url, focused: false }));
   try {
     const tabId = win?.tabs?.[0]?.id;
     if (tabId == null) throw new CheckError({ key: 'errTabRead', params: { message: 'no tab' } });
@@ -101,7 +101,7 @@ export async function testSelector(url: string, selector: string, ignoreVolatile
 
 async function notify(site: Site, kind: 'changed' | 'error'): Promise<void> {
   const settings = await getSettings();
-  if (isDnd(settings, new Date())) return; 
+  if (isDnd(settings, new Date())) return;
   const { t } = await loadI18n();
   const changed = kind === 'changed';
   const name = site.name || site.url;

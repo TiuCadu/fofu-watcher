@@ -9,7 +9,7 @@ declare global {
 }
 
 (() => {
-  if (window.__fofuPickerActive) return; 
+  if (window.__fofuPickerActive) return;
   window.__fofuPickerActive = true;
   const ctx = window.__fofuPick ?? { strings: {} };
   const barText = ctx.strings.pickerBar ?? 'Click · ↑ parent · Esc';
@@ -22,7 +22,7 @@ declare global {
     .bar{position:fixed;top:12px;left:50%;transform:translateX(-50%);max-width:92vw;background:#1b1f2a;color:#fff;
       font:14px/1.4 system-ui,sans-serif;padding:8px 14px;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.35)}
   </style><div class="box"></div><div class="bar"></div>`;
-  (shadow.querySelector('.bar') as HTMLElement).textContent = barText; 
+  (shadow.querySelector('.bar') as HTMLElement).textContent = barText;
   const box = shadow.querySelector('.box') as HTMLElement;
   document.documentElement.append(host);
 

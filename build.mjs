@@ -49,7 +49,7 @@ const chunk = (type, data) => {
   return Buffer.concat([len, td, crc]);
 };
 function makeIcon(size) {
-  const SS = 4; 
+  const SS = 4;
   const raw = Buffer.alloc((size * 4 + 1) * size);
   const R = size / 2;
   for (let y = 0; y < size; y++) {
@@ -76,7 +76,7 @@ function makeIcon(size) {
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8; ihdr[9] = 6; 
+  ihdr[8] = 8; ihdr[9] = 6;
   return Buffer.concat([
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
     chunk('IHDR', ihdr),

@@ -33,7 +33,7 @@ function bloquear(motivo) {
 }
 
 const git = spawnSync('git', ['status', '--porcelain', '-uall'], { encoding: 'utf8' });
-if (git.status !== 0) process.exit(0); 
+if (git.status !== 0) process.exit(0);
 
 const alterados = git.stdout
   .split('\n')
@@ -41,7 +41,7 @@ const alterados = git.stdout
   .map((linha) => ({ status: linha.slice(0, 2), arquivo: linha.slice(3).split(' -> ').pop().replace(/^"|"$/g, '') }));
 
 const ehCodigo = (f) => /^(src|test|_locales)\//.test(f) || f === 'build.mjs' || f === 'manifest.json';
-if (!alterados.some(({ arquivo }) => ehCodigo(arquivo))) liberar(); 
+if (!alterados.some(({ arquivo }) => ehCodigo(arquivo))) liberar();
 
 const lerArquivo = (f) => { try { return readFileSync(f, 'utf8'); } catch { return ''; } };
 
