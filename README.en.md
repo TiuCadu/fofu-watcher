@@ -5,6 +5,16 @@
 A Manifest V3 extension for **Google Chrome and Brave** that monitors websites and notifies you when their content changes.
 Everything runs locally: no external server, no telemetry.
 
+<p align="center">
+  <img src="docs/screenshots/popup-en.png" alt="Popup with the monitored sites and the status of each one" width="300">
+  <img src="docs/screenshots/history-en.png" alt="Change history with the removed and added lines" width="520">
+</p>
+<p align="center">
+  <img src="docs/screenshots/sites-en.png" alt="Options page with the site list, the schedule rule and the next check" width="700">
+</p>
+
+<sub>The sites in the screenshots are fictional examples.</sub>
+
 ## Installation (developer mode)
 
 Requirements: Git and Node.js 20+ (only to build; developed with Node 24).

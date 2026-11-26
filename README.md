@@ -5,6 +5,16 @@
 Extensão (Manifest V3) para **Google Chrome e Brave** que monitora sites e avisa quando o conteúdo muda.
 Tudo roda localmente: sem servidor externo, sem telemetria.
 
+<p align="center">
+  <img src="docs/screenshots/popup-pt.png" alt="Popup com os sites monitorados e o status de cada um" width="300">
+  <img src="docs/screenshots/history-pt.png" alt="Histórico de mudanças com as linhas removidas e adicionadas" width="520">
+</p>
+<p align="center">
+  <img src="docs/screenshots/sites-pt.png" alt="Página de opções com a lista de sites, a regra de agenda e a próxima verificação" width="700">
+</p>
+
+<sub>Os sites dos prints são exemplos fictícios.</sub>
+
 ## Instalação (modo desenvolvedor)
 
 Requisitos: Git e Node.js 20+ (só para compilar; desenvolvido com o Node 24).
