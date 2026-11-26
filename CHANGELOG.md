@@ -2,6 +2,17 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.6.3] — Pronta para as lojas
+### Alterado
+- A descrição da extensão em português (exibida pelo navegador e pelas lojas) ficou igual à em inglês: "Monitora sites e avisa quando o conteúdo mudar. Tudo local, sem telemetria."
+
+### Interno
+- Política de privacidade em pt/en (`PRIVACY.md`), com link nos READMEs.
+- Textos das lojas, justificativas das permissões e notas de revisão em `store/listing.md`; imagens das lojas em `store/images/` (`npm run store-images`).
+- Prints da extensão nos READMEs, refeitos por `npm run screenshots`.
+- Desenho do ícone movido do `build.mjs` para `scripts/icon.mjs` (os PNGs gerados não mudaram).
+- Processo de release documentado no `CLAUDE.md`.
+
 ## [1.6.2] — Agenda com vários horários
 ### Corrigido
 - **Depois de salvar, o card do site continuava mostrando a agenda antiga** (ex.: "Às 09:00" mesmo com 09:00 e 17:00 gravados). A gravação estava certa, mas a lista só se redesenha pelo `storage.onChanged`, que é ignorado com o formulário aberto, e o evento da gravação chega antes de o formulário fechar. Na edição nenhuma verificação roda logo em seguida, então nada redesenhava a lista até recarregar a página. Agora fechar o formulário redesenha a lista. Teste: `regressão: depois de salvar, o card do site mostra a agenda nova (ex.: 09:00 e 17:00)` (`test/regressions.test.ts`). Reproduzido e verificado no navegador real (Edge headless, perfil temporário): antes, storage `["09:00","17:00"]` e card "Às 09:00"; depois, card "Às 09:00, 17:00" com a próxima verificação às 17:00.
