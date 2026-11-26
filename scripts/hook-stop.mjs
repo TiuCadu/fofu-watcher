@@ -40,6 +40,17 @@ const alterados = git.stdout
   .filter(Boolean)
   .map((linha) => ({ status: linha.slice(0, 2), arquivo: linha.slice(3).split(' -> ').pop().replace(/^"|"$/g, '') }));
 
+// README.md (pt) e README.en.md (en) sempre andam juntos: alterou um, altere o outro.
+const READMES = ['README.md', 'README.en.md'];
+const readmesAlterados = READMES.filter((f) => alterados.some(({ arquivo }) => arquivo === f));
+if (readmesAlterados.length === 1) {
+  const outro = READMES.find((f) => f !== readmesAlterados[0]);
+  bloquear(
+    `Voce alterou ${readmesAlterados[0]} mas nao ${outro}.\n\n` +
+    `Siga a regra do CLAUDE.md: os dois READMEs tem sempre o mesmo conteudo. Leve a mesma alteracao, traduzida, para ${outro}.`
+  );
+}
+
 const ehCodigo = (f) => /^(src|test|_locales)\//.test(f) || f === 'build.mjs' || f === 'manifest.json';
 if (!alterados.some(({ arquivo }) => ehCodigo(arquivo))) liberar();
 
