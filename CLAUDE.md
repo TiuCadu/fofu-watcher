@@ -9,6 +9,7 @@ Extensão MV3 (Chrome/Brave) em TypeScript que monitora sites. Veja o README par
 - **Bug encontrado?** Primeiro escreva um teste que reproduz o bug (nome começa com `regressão:`), veja-o falhar, corrija e veja passar. Registre no `CHANGELOG.md` (seção "Corrigido") citando o nome do teste — isso dá a rastreabilidade.
 - Código que usa `chrome.*` (background, popup, options) não tem teste unitário; mantenha a lógica nova em `src/utils/` (pura, sem `chrome.*`) sempre que possível para poder testá-la.
 - Nunca apague/enfraqueça um teste para fazê-lo passar sem avisar o usuário.
+- O README mostra o total de testes entre `<!-- test-count -->…<!-- /test-count -->`. O `test/run.mjs` conta as linhas `ok` e atualiza esse número sozinho quando todos passam; ao criar testes, inclua o `README.md` alterado no commit e não edite o número à mão.
 
 ## Idioma e hora (i18n)
 - **Nenhum texto fixo de interface no código.** Todo texto vem de `_locales/pt_BR/messages.json` e `_locales/en_US/messages.json` (fonte única, também usada pelo `chrome.i18n` no manifest). HTML: `data-i18n="chave"`; TS: `t('chave', { param })`. Ao criar/alterar texto, edite **os dois** idiomas — o teste de paridade falha se faltar chave ou divergirem os `{parâmetros}`.

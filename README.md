@@ -35,6 +35,8 @@ Outros comandos: `npm test` (testes unitários), `npm run typecheck` (TypeScript
 
 ## Testes unitários
 
+Total atual: **<!-- test-count -->104<!-- /test-count --> testes** (atualizado automaticamente pelo `npm test` quando todos passam).
+
 ```bash
 npm test          # só os testes
 npm run check     # typecheck + testes + build (rode a cada alteração)
