@@ -7,7 +7,7 @@ Tudo roda localmente: sem servidor externo, sem telemetria.
 
 ## Instalação (modo desenvolvedor)
 
-Requisitos: Git e Node.js 20+ (só para compilar e testar; desenvolvido com o Node 24).
+Requisitos: Git e Node.js 20+ (só para compilar; desenvolvido com o Node 24).
 
 ```bash
 git clone https://github.com/TiuCadu/fofu-watcher.git
@@ -31,20 +31,13 @@ O repositório é privado: para clonar, sua conta do GitHub precisa ter acesso a
 4. Em Brave, confira em *Configurações → Sistema/Notificações* e nas notificações do Windows/macOS que o Brave pode exibir avisos.
 
 Depois de alterar o código: `npm run build` e clique em **Recarregar** (↻) na página de extensões.
-Outros comandos: `npm test` (testes unitários), `npm run typecheck` (TypeScript em `src/` e em `test/`), `npm run check` (tudo).
-
-## Testes unitários
-
-Total atual: **<!-- test-count -->107<!-- /test-count --> testes** (atualizado automaticamente pelo `npm test` quando todos passam). Como os testes são organizados e escritos está no [CLAUDE.md](CLAUDE.md).
 
 ## Repositório e fluxo de trabalho
 
 - **GitHub:** [TiuCadu/fofu-watcher](https://github.com/TiuCadu/fofu-watcher) (privado). A branch principal é a `main`.
-- **Antes de cada commit:** `npm run check` precisa passar. Mudou lógica em `src/utils/`? O teste correspondente entra no mesmo commit.
 - **Commits:** mensagem em português, no presente (`Adiciona …`, `Corrige …`), com a versão entre parênteses quando houver (ex.: `Corrige … (v1.6.2)`). Mudanças visíveis ao usuário entram no [CHANGELOG](CHANGELOG.md).
 - **Finais de linha:** o `.gitattributes` fixa LF em todos os arquivos, inclusive no Windows.
 - **Não versionados:** `node_modules/`, `dist/` (gerado pelo build) e `.llm/` (rascunhos locais).
-- **Claude Code:** `.claude/settings.json` define dois hooks. O `scripts/hook-tests.mjs` roda `npm test` a cada edição de código, e o `scripts/hook-stop.mjs`, ao fim de cada tarefa, cobra testes para mudanças em `src/utils/`, exige que os dois READMEs (português e inglês) sejam alterados juntos e roda o `npm run check`. As regras do projeto para o assistente estão no [CLAUDE.md](CLAUDE.md).
 
 ## Como usar
 
@@ -142,7 +135,7 @@ _locales/       dicionários pt_BR e en_US (messages.json) — fonte única de t
 - **`chrome.i18n`** (com `default_locale: pt_BR` no manifest) traduz o **nome e a descrição** da extensão (inclusive na loja), seguindo o idioma do navegador. Ele não permite troca manual.
 - **Camada própria** (`src/utils/i18n.ts`): lê os **mesmos** `messages.json` conforme a preferência salva no storage, o que permite trocar o idioma dentro da extensão. Mensagens de erro são guardadas como `{ chave, parâmetros }` e traduzidas só na exibição, então também mudam de idioma ao vivo.
 - Datas e horas usam `Intl.DateTimeFormat` com o locale escolhido (`pt-BR`/`en-US`) e o ciclo de horas (12h/24h).
-- **Adicionar um idioma/texto:** inclua a chave nos dois `messages.json` (os testes falham se faltar em algum ou se os `{parâmetros}` divergirem).
+- **Adicionar um idioma/texto:** inclua a chave nos dois `messages.json`.
 
 - **Agendamento:** cada site guarda seu `nextRun`. Um único `chrome.alarms` de 1 minuto acorda o service worker, que verifica os sites vencidos. O alarm é recriado em `onInstalled`, `onStartup` e a cada despertar do worker. Se o navegador estava fechado no horário, o `nextRun` vencido dispara a verificação atrasada ao abrir.
 - **Detecção:** texto normalizado (espaços/quebras) → SHA-256 → comparação com o hash anterior.

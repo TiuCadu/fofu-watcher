@@ -18,16 +18,7 @@ for (const file of fs.readdirSync('test').filter((f) => f.endsWith('.test.ts')).
 }
 fs.rmSync(dir, { recursive: true, force: true });
 
-// Mantém o total de testes dos READMEs (pt e en) em dia (só quando tudo passou).
 if (!failed) {
-  for (const readme of ['README.md', 'README.en.md']) {
-    const text = fs.readFileSync(readme, 'utf8');
-    const updated = text.replace(/(<!-- test-count -->)\d+(<!-- \/test-count -->)/, `$1${total}$2`);
-    if (updated !== text) {
-      fs.writeFileSync(readme, updated);
-      console.log(`\n${readme}: total de testes atualizado para ${total}.`);
-    }
-  }
   console.log(`\nTotal: ${total} testes.`);
 }
 process.exit(failed ? 1 : 0);
