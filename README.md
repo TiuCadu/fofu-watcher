@@ -7,12 +7,16 @@ Tudo roda localmente: sem servidor externo, sem telemetria.
 
 ## Instalação (modo desenvolvedor)
 
-Requisitos: Node.js 18+ (só para compilar).
+Requisitos: Git e Node.js 20+ (só para compilar e testar; desenvolvido com o Node 24).
 
 ```bash
+git clone https://github.com/TiuCadu/fofu-watcher.git
+cd fofu-watcher
 npm install
 npm run build      # gera a pasta dist/
 ```
+
+O repositório é privado: para clonar, sua conta do GitHub precisa ter acesso a ele.
 
 **Chrome**
 1. Abra `chrome://extensions`.
@@ -27,7 +31,7 @@ npm run build      # gera a pasta dist/
 4. Em Brave, confira em *Configurações → Sistema/Notificações* e nas notificações do Windows/macOS que o Brave pode exibir avisos.
 
 Depois de alterar o código: `npm run build` e clique em **Recarregar** (↻) na página de extensões.
-Outros comandos: `npm test` (testes de agenda, comparação, diff, idioma e hora), `npm run typecheck`.
+Outros comandos: `npm test` (testes unitários), `npm run typecheck` (TypeScript em `src/` e em `test/`), `npm run check` (tudo).
 
 ## Testes unitários
 
@@ -36,10 +40,20 @@ npm test          # só os testes
 npm run check     # typecheck + testes + build (rode a cada alteração)
 ```
 
-- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https), `test/history.test.ts` (quais sites aparecem no histórico e exclusão de mudanças), `test/scheduling.test.ts` (simulação do tick de 1 minuto: o intervalo não atrasa; cliques durante uma verificação), `test/page-reader.test.ts` (modo "Ler abrindo a página": detecção de login/verificação, leitura do conteúdo montado e "clicar antes de ler"), `test/options-tab.test.ts` (reaproveitar a aba de opções), `test/site-list.test.ts` (salvar várias vezes não duplica), `test/check-result.test.ts` (mensagem do "Verificar agora") e `test/regressions.test.ts` (regressões em código com `chrome.*`, por varredura do código-fonte). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
+- Arquivos: `test/utils.test.ts` (agenda, normalização, diff) e `test/i18n.test.ts` (idioma e formato de hora) e `test/selector.test.ts` (geração do seletor CSS) e `test/url.test.ts` (links clicáveis: só http/https), `test/history.test.ts` (quais sites aparecem no histórico e exclusão de mudanças), `test/scheduling.test.ts` (simulação do tick de 1 minuto: o intervalo não atrasa; cliques durante uma verificação), `test/page-reader.test.ts` (modo "Ler abrindo a página": detecção de login/verificação, leitura do conteúdo montado e "clicar antes de ler"), `test/options-tab.test.ts` (reaproveitar a aba de opções), `test/site-list.test.ts` (salvar várias vezes não duplica), `test/check-result.test.ts` (mensagem do "Verificar agora"), `test/hash.test.ts` (impressão SHA-256 do conteúdo), `test/timepicker.test.ts` (seletor de hora 12h/24h, com DOM falso) e `test/regressions.test.ts` (regressões em código com `chrome.*`, por varredura do código-fonte). O runner `test/run.mjs` executa todo `test/*.test.ts`, com fuso fixo `America/Sao_Paulo`.
 - Cobertura: agenda (horários fixos, dias da semana, intervalo, janela, janela que cruza a meia-noite), "Não perturbe", normalização de texto, ignorar voláteis e diff por linhas; **idioma e hora**: formatação 12h/24h com `Intl`, conversão 12h↔24h (ida e volta nos 1440 minutos do dia), resolução automática de idioma/formato, tradutor, **seletor visual** (para todo elemento de uma página de exemplo, o seletor gerado acha exatamente aquele elemento; ids/classes gerados automaticamente são ignorados) e **paridade dos dicionários** (mesmas chaves e parâmetros em pt-BR e en-US, nenhuma chave usada no código sem tradução).
 - Código que depende de `chrome.*` não é testado unitariamente; por isso a lógica pura fica em `src/utils/`.
+- Os testes também passam pelo typecheck (`tsconfig.test.json`, que inclui os tipos do Node só para `test/`). O código da extensão (`src/`) não enxerga as APIs do Node.
 - **Fluxo para bugs:** escrever um teste `regressão: …` que falha → corrigir → teste passa → registrar no [CHANGELOG](CHANGELOG.md). Assim cada bug fica rastreável.
+
+## Repositório e fluxo de trabalho
+
+- **GitHub:** [TiuCadu/fofu-watcher](https://github.com/TiuCadu/fofu-watcher) (privado). A branch principal é a `main`.
+- **Antes de cada commit:** `npm run check` precisa passar. Mudou lógica em `src/utils/`? O teste correspondente entra no mesmo commit.
+- **Commits:** mensagem em português, no presente (`Adiciona …`, `Corrige …`), com a versão entre parênteses quando houver (ex.: `Corrige … (v1.6.2)`). Mudanças visíveis ao usuário entram no [CHANGELOG](CHANGELOG.md).
+- **Finais de linha:** o `.gitattributes` fixa LF em todos os arquivos, inclusive no Windows.
+- **Não versionados:** `node_modules/`, `dist/` (gerado pelo build) e `.llm/` (rascunhos locais).
+- **Claude Code:** `.claude/settings.json` define dois hooks. O `scripts/hook-tests.mjs` roda `npm test` a cada edição de código, e o `scripts/hook-stop.mjs`, ao fim de cada tarefa, cobra testes para mudanças em `src/utils/` e roda o `npm run check`. As regras do projeto para o assistente estão no [CLAUDE.md](CLAUDE.md).
 
 ## Como usar
 
