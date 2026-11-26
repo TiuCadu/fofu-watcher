@@ -4,7 +4,7 @@ Extensão MV3 (Chrome/Brave) em TypeScript que monitora sites. Veja o README par
 
 ## Regra obrigatória: testes a cada alteração
 - **Depois de QUALQUER alteração em `src/`, `build.mjs` ou `manifest.json`, rode `npm run check`** (typecheck + testes + build) e informe o resultado ao usuário. Não considere a tarefa concluída com o check falhando.
-- Testes unitários: `test/*.test.ts` (executados por `npm test`, via `test/run.mjs`, com `TZ=America/Sao_Paulo`). `utils.test.ts`: agenda (`computeNextRun`, janelas, "Não perturbe"), normalização/voláteis e diff. `i18n.test.ts`: formatação 12h/24h, conversão `to12h`/`from12h`, resolução de idioma/formato, tradutor, paridade dos dicionários e varredura das chaves usadas no código. `history.test.ts`: sites listados no Histórico e exclusão de mudanças. `scheduling.test.ts`: simulação do tick de 1 min (`isDue`) e verificações simultâneas (`singleFlight`). `page-reader.test.ts`: detecção de login/verificação e leitura do conteúdo montado (DOM falso, determinístico). `selector.test.ts`, `url.test.ts`, `check-result.test.ts`. `regressions.test.ts`: regressões em código com `chrome.*`, verificadas por varredura do código-fonte.
+- Testes unitários: `test/*.test.ts` (executados por `npm test`, via `test/run.mjs`, com `TZ=America/Sao_Paulo`). `utils.test.ts`: agenda (`computeNextRun`, janelas, "Não perturbe"), normalização/voláteis e diff. `i18n.test.ts`: formatação 12h/24h, conversão `to12h`/`from12h`, resolução de idioma/formato, tradutor, paridade dos dicionários e varredura das chaves usadas no código. `history.test.ts`: sites listados no Histórico e exclusão de mudanças. `scheduling.test.ts`: simulação do tick de 1 min (`isDue`) e verificações simultâneas (`singleFlight`). `page-reader.test.ts`: detecção de login/verificação e leitura do conteúdo montado (DOM falso, determinístico). `hash.test.ts`: impressão SHA-256 (vetores conhecidos, UTF-8). `timepicker.test.ts`: seletor de hora 12h/24h com DOM falso (valor sempre `"HH:mm"`). `selector.test.ts`, `url.test.ts`, `check-result.test.ts`. `regressions.test.ts`: regressões em código com `chrome.*`, verificadas por varredura do código-fonte.
 - **Mudou ou criou lógica pura em `src/utils/`?** Adicione/ajuste testes na mesma alteração.
 - **Bug encontrado?** Primeiro escreva um teste que reproduz o bug (nome começa com `regressão:`), veja-o falhar, corrija e veja passar. Registre no `CHANGELOG.md` (seção "Corrigido") citando o nome do teste — isso dá a rastreabilidade.
 - Código que usa `chrome.*` (background, popup, options) não tem teste unitário; mantenha a lógica nova em `src/utils/` (pura, sem `chrome.*`) sempre que possível para poder testá-la.
@@ -29,6 +29,14 @@ Extensão MV3 (Chrome/Brave) em TypeScript que monitora sites. Veja o README par
 
 ## Hook automático
 `.claude/settings.json` define um hook PostToolUse (Edit|Write) que roda `scripts/hook-tests.mjs`: ao editar arquivos de `src/`, `test/`, `_locales/`, `build.mjs` ou `manifest.json`, executa `npm test`. Se falhar (exit 2), o erro volta para mim e devo corrigir antes de seguir. O hook só roda os testes; o `npm run check` completo (typecheck + build) continua sendo obrigatório ao concluir.
+
+Há também um hook **Stop** (`scripts/hook-stop.mjs`), que roda quando vou encerrar uma tarefa. Ele usa o `git status` (depende do repositório git) e:
+1. **Bloqueia** se um `src/utils/*.ts` alterado não tiver teste correspondente: algum `test/*.test.ts` alterado ou criado precisa importá-lo (`from '../src/utils/<nome>'`, o padrão dos testes atuais). A mensagem lista só os arquivos sem teste. Dois casos ficam de fora, decididos pelo conteúdo do arquivo (sem lista fixa, valendo para arquivos novos):
+   - **Usa `chrome.*`** (sem contar comentários) **e nenhum** `test/*.test.ts` do repositório o importa: não tem teste unitário, conforme a regra acima. Se algum teste já importa o arquivo (ex.: `i18n.ts`, `options-tab.ts`), a regra normal vale e devo ajustar o teste.
+   - **Só exporta tipos** (`type`/`interface`): o esbuild do projeto apaga os tipos e não sobra código que roda. `types.ts` **não** se encaixa, porque tem constantes (`MAX_HISTORY` etc.).
+2. Se mudou código do projeto (`src/`, `test/`, `_locales/`, `build.mjs`, `manifest.json`), roda o **`npm run check`** completo e bloqueia se falhar.
+
+Ele bloqueia **no máximo 3 vezes** seguidas na sessão (o contador zera quando a verificação passa); na 4ª tentativa libera para não travar. Se eu não conseguir resolver (ex.: a mudança em `src/utils/` só mexe em código com `chrome.*`, que não tem teste unitário), devo **explicar o motivo ao usuário** em vez de encerrar calado.
 
 ## Comandos
 - `npm run build` → gera `dist/` · `npm test` → testes · `npm run typecheck` → tsc · `npm run check` → tudo

@@ -12,6 +12,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/hook-stop.mjs",
+            "timeout": 300,
+            "statusMessage": "Conferindo testes novos e rodando npm run check…"
+          }
+        ]
+      }
     ]
   }
 }
