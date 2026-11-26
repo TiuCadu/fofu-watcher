@@ -46,4 +46,5 @@ Ele bloqueia **no máximo 3 vezes** seguidas na sessão (o contador zera quando 
 
 ## Comandos
 - `npm run build` → gera `dist/` · `npm test` → testes · `npm run typecheck` → tsc em `src/` (`tsconfig.json`) e em `test/` (`tsconfig.test.json`) · `npm run check` → tudo
+- `npm run screenshots` → compila e refaz os prints dos READMEs (`docs/screenshots/*-pt.png` e `*-en.png`) com `scripts/screenshots.mjs`: Edge headless com perfil temporário e sites fictícios (domínios `exemplo.*`). Mudou algo visível no popup, na lista de sites ou no histórico? Rode e confira as imagens antes do commit.
 - Os tipos do Node (`@types/node`) só valem em `test/` (`tsconfig.test.json`); `src/` usa só `chrome`, para que nenhuma API do Node entre no código da extensão. Em testes, prefira `satisfies Tipo` a `as const` em objetos com arrays (o `as const` gera `readonly` e não bate com os tipos de `src/utils/types.ts`).
