@@ -39,4 +39,5 @@ Há também um hook **Stop** (`scripts/hook-stop.mjs`), que roda quando vou ence
 Ele bloqueia **no máximo 3 vezes** seguidas na sessão (o contador zera quando a verificação passa); na 4ª tentativa libera para não travar. Se eu não conseguir resolver (ex.: a mudança em `src/utils/` só mexe em código com `chrome.*`, que não tem teste unitário), devo **explicar o motivo ao usuário** em vez de encerrar calado.
 
 ## Comandos
-- `npm run build` → gera `dist/` · `npm test` → testes · `npm run typecheck` → tsc · `npm run check` → tudo
+- `npm run build` → gera `dist/` · `npm test` → testes · `npm run typecheck` → tsc em `src/` (`tsconfig.json`) e em `test/` (`tsconfig.test.json`) · `npm run check` → tudo
+- Os tipos do Node (`@types/node`) só valem em `test/` (`tsconfig.test.json`); `src/` usa só `chrome`, para que nenhuma API do Node entre no código da extensão. Em testes, prefira `satisfies Tipo` a `as const` em objetos com arrays (o `as const` gera `readonly` e não bate com os tipos de `src/utils/types.ts`).

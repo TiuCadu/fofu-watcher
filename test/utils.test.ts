@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { diffLines } from '../src/utils/diff';
 import { normalizeText } from '../src/utils/normalize';
 import { computeNextRun, fixedTimes, inWindow, isDnd } from '../src/utils/time';
+import type { Schedule, Settings } from '../src/utils/types';
 
 const D = (s: string) => new Date(s);
 const iso = (ms: number) => { const d = new Date(ms); const p = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
@@ -9,15 +10,15 @@ let n = 0;
 const t = (name: string, fn: () => void) => { fn(); n++; console.log('ok  ', name); };
 
 t('fixed: próximo horário do mesmo dia', () => {
-  const s = { mode: 'fixed', times: ['09:00', '13:00', '18:00'], days: [] } as const;
+  const s = { mode: 'fixed', times: ['09:00', '13:00', '18:00'], days: [] } satisfies Schedule;
   assert.equal(iso(computeNextRun(s, D('2026-03-04T10:00:00'))), '2026-03-04 13:00');
 });
 t('fixed: estritamente depois (não repete o horário atual)', () => {
-  const s = { mode: 'fixed', times: ['09:00', '13:00'], days: [] } as const;
+  const s = { mode: 'fixed', times: ['09:00', '13:00'], days: [] } satisfies Schedule;
   assert.equal(iso(computeNextRun(s, D('2026-03-04T13:00:00'))), '2026-03-05 09:00');
 });
 t('fixed: respeita dias da semana (só seg/sex)', () => {
-  const s = { mode: 'fixed', times: ['08:00'], days: [1, 5] } as const;
+  const s = { mode: 'fixed', times: ['08:00'], days: [1, 5] } satisfies Schedule;
   assert.equal(iso(computeNextRun(s, D('2026-03-04T10:00:00'))), '2026-03-06 08:00');
   assert.equal(iso(computeNextRun(s, D('2026-03-06T09:00:00'))), '2026-03-09 08:00');
 });
@@ -52,7 +53,7 @@ t('janela que cruza a meia-noite', () => {
   assert.ok(!inWindow(12 * 60, 22 * 60, 7 * 60));
 });
 t('não perturbe', () => {
-  const st = { sound: true, dndEnabled: true, dndStart: '22:00', dndEnd: '07:00' };
+  const st: Settings = { language: 'auto', hourFormat: 'auto', sound: true, dndEnabled: true, dndStart: '22:00', dndEnd: '07:00' };
   assert.ok(isDnd(st, D('2026-03-04T23:10:00')));
   assert.ok(!isDnd(st, D('2026-03-04T12:00:00')));
   assert.ok(!isDnd({ ...st, dndEnabled: false }, D('2026-03-04T23:10:00')));

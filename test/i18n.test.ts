@@ -5,6 +5,7 @@ import { errorText, interpolate, makeTranslator, resolveHour12, resolveLanguage,
 import {
   computeNextRun, describeSchedule, formatDateTime, formatHM, from12h, to12h, weekdayShort, type TimeFormat,
 } from '../src/utils/time';
+import type { Schedule } from '../src/utils/types';
 
 const loadMessages = (dir: string): Messages => JSON.parse(fs.readFileSync(path.join('_locales', dir, 'messages.json'), 'utf8'));
 const PT = loadMessages('pt_BR');
@@ -66,7 +67,7 @@ t('to12h/from12h: ida e volta preserva TODOS os 1440 horários (nunca corrompe o
   assert.equal(from12h(12, 0, true), '12:00');
 });
 t('agenda guardada em "HH:mm" é calculada igual, qualquer que seja o formato de exibição', () => {
-  const s = { mode: 'fixed', times: ['18:00'], days: [] } as const;
+  const s = { mode: 'fixed', times: ['18:00'], days: [] } satisfies Schedule;
   const d = new Date(computeNextRun(s, new Date('2026-03-04T10:00:00')));
   assert.equal(`${d.getHours()}:${d.getMinutes()}`, '18:0');
 });
