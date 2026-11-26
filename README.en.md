@@ -35,18 +35,7 @@ Other commands: `npm test` (unit tests), `npm run typecheck` (TypeScript in `src
 
 ## Unit tests
 
-Current total: **<!-- test-count -->107<!-- /test-count --> tests** (updated automatically by `npm test` when all of them pass).
-
-```bash
-npm test          # tests only
-npm run check     # typecheck + tests + build (run after every change)
-```
-
-- Files: `test/utils.test.ts` (schedule, normalization, diff) `test/i18n.test.ts` (language and time format) and `test/selector.test.ts` (CSS selector generation) and `test/url.test.ts` (clickable links: http/https only), `test/history.test.ts` (which sites appear in the history and deleting changes), `test/scheduling.test.ts` (1-minute tick simulation: intervals do not drift; clicks during a running check), `test/page-reader.test.ts` ("Read by opening the page": login/verification detection, reading the rendered content and "click before reading"), `test/options-tab.test.ts` (reusing the options tab), `test/site-list.test.ts` (saving repeatedly does not duplicate), `test/check-result.test.ts` ("Check now" message), `test/hash.test.ts` (SHA-256 fingerprint of the content), `test/timepicker.test.ts` (12h/24h time picker, with a fake DOM), `test/readme.test.ts` (Portuguese and English READMEs with the same structure) and `test/regressions.test.ts` (regressions in `chrome.*` code, via source scan). The `test/run.mjs` runner executes every `test/*.test.ts` with a fixed `America/Sao_Paulo` time zone.
-- Coverage: schedule (fixed times, weekdays, interval, window, window crossing midnight), "Do not disturb", text normalization, volatile-content filtering and line diff; **language and time**: 12h/24h formatting with `Intl`, 12h↔24h conversion (round trip over all 1440 minutes of the day), automatic language/format resolution, translator, **visual picker** (for every element of a sample page, the generated selector finds exactly that element; auto-generated ids/classes are ignored) and **dictionary parity** (same keys and parameters in pt-BR and en-US, no key used in code without a translation).
-- Code that depends on `chrome.*` is not unit-tested, so pure logic lives in `src/utils/`.
-- Tests are type-checked too (`tsconfig.test.json`, which includes the Node types for `test/` only). The extension code (`src/`) cannot see Node APIs.
-- **Bug workflow:** write a failing `regressão: …` test → fix → test passes → log it in the [CHANGELOG](CHANGELOG.md), so every bug stays traceable.
+Current total: **<!-- test-count -->107<!-- /test-count --> tests** (updated automatically by `npm test` when all of them pass). How the tests are organized and written is described in [CLAUDE.md](CLAUDE.md).
 
 ## Repository and workflow
 
