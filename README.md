@@ -167,6 +167,10 @@ _locales/       dicionários pt_BR e en_US (messages.json) — fonte única de t
 - Só há português (Brasil) e inglês (EUA); para outros idiomas do navegador, o nome e a descrição da extensão exibidos pelo navegador/loja caem no português.
 - A ordem da data segue o idioma escolhido (ex.: `04/03/2026` em pt-BR e `03/04/2026` em en-US).
 
+## Privacidade
+
+Nada é coletado: tudo fica no seu navegador e a extensão só acessa os sites que você adicionou. Detalhes na [política de privacidade](PRIVACY.md).
+
 ## Licença
 
 [MIT](LICENSE): pode usar, copiar, modificar e distribuir à vontade, mantendo o aviso de copyright.

@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test": "node test/run.mjs",
     "check": "npm run typecheck && npm test && npm run build",
-    "screenshots": "npm run build && node scripts/screenshots.mjs"
+    "screenshots": "npm run build && node scripts/screenshots.mjs",
+    "store-images": "node scripts/store-images.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.300",

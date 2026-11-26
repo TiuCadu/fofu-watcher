@@ -47,6 +47,8 @@ Ele bloqueia **no máximo 3 vezes** seguidas na sessão (o contador zera quando 
 ## Comandos
 - `npm run build` → gera `dist/` · `npm test` → testes · `npm run typecheck` → tsc em `src/` (`tsconfig.json`) e em `test/` (`tsconfig.test.json`) · `npm run check` → tudo
 - `npm run screenshots` → compila e refaz os prints dos READMEs (`docs/screenshots/*-pt.png` e `*-en.png`) com `scripts/screenshots.mjs`: Edge headless com perfil temporário e sites fictícios (domínios `exemplo.*`). Mudou algo visível no popup, na lista de sites ou no histórico? Rode e confira as imagens antes do commit.
+- `npm run store-images` → refaz as imagens das lojas em `store/images/` (1280×800, 440×280 e logo 300×300) a partir de `docs/screenshots/`; rode depois do `screenshots`. Textos das lojas, justificativas de permissões e notas de revisão ficam em `store/listing.md`; a política de privacidade é o `PRIVACY.md`. Mudou permissão, coleta de dados ou o que a extensão acessa? Atualize os dois.
+- O desenho do ícone fica em `scripts/icon.mjs` (usado pelo build e pelas imagens da loja).
 - Os tipos do Node (`@types/node`) só valem em `test/` (`tsconfig.test.json`); `src/` usa só `chrome`, para que nenhuma API do Node entre no código da extensão. Em testes, prefira `satisfies Tipo` a `as const` em objetos com arrays (o `as const` gera `readonly` e não bate com os tipos de `src/utils/types.ts`).
 
 ## Release (só quando o usuário pedir)

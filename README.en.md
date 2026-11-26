@@ -167,6 +167,10 @@ _locales/       pt_BR and en_US dictionaries (messages.json) — single source o
 - Only Portuguese (Brazil) and English (US) are provided; the extension name/description shown by the browser/store falls back to Portuguese for other browser languages.
 - The date order follows the chosen locale (e.g. `04/03/2026` in pt-BR vs `03/04/2026` in en-US).
 
+## Privacy
+
+Nothing is collected: everything stays in your browser and the extension only accesses the sites you added. Details in the [privacy policy](PRIVACY.md).
+
 ## License
 
 [MIT](LICENSE): free to use, copy, modify and distribute, as long as the copyright notice is kept.
