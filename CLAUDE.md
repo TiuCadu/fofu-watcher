@@ -48,3 +48,14 @@ Ele bloqueia **no máximo 3 vezes** seguidas na sessão (o contador zera quando 
 - `npm run build` → gera `dist/` · `npm test` → testes · `npm run typecheck` → tsc em `src/` (`tsconfig.json`) e em `test/` (`tsconfig.test.json`) · `npm run check` → tudo
 - `npm run screenshots` → compila e refaz os prints dos READMEs (`docs/screenshots/*-pt.png` e `*-en.png`) com `scripts/screenshots.mjs`: Edge headless com perfil temporário e sites fictícios (domínios `exemplo.*`). Mudou algo visível no popup, na lista de sites ou no histórico? Rode e confira as imagens antes do commit.
 - Os tipos do Node (`@types/node`) só valem em `test/` (`tsconfig.test.json`); `src/` usa só `chrome`, para que nenhuma API do Node entre no código da extensão. Em testes, prefira `satisfies Tipo` a `as const` em objetos com arrays (o `as const` gera `readonly` e não bate com os tipos de `src/utils/types.ts`).
+
+## Release (só quando o usuário pedir)
+Nunca crie release por conta própria. Quando o usuário pedir ("cria a release", "lança uma versão"…):
+1. **Levante tudo o que mudou desde a última release:** `git describe --tags --abbrev=0` dá a última tag; `git log <tag>..HEAD` lista os commits. Toda modificação entra nas notas, não só as visíveis ao usuário.
+2. **Versão:** sem nada novo para o usuário → patch (1.6.2 → 1.6.3); feature nova → minor (1.7.0). Na dúvida, pergunte. Atualize `manifest.json` e `package.json` juntos.
+3. **CHANGELOG:** garanta a seção `## [x.y.z] — título` com tudo o que é visível ao usuário (Adicionado/Alterado/Corrigido). Mudanças internas que ainda não estão lá entram como uma lista curta em "Interno".
+4. `npm run check` precisa passar. Mudou algo visível no popup, na lista ou no histórico? Rode `npm run screenshots`.
+5. Commit (`Versão x.y.z`) e push.
+6. **Zip:** `tar.exe -a -c -f <scratchpad>\fofu-watcher-vX.Y.Z.zip *` rodado **dentro de `dist/`** (o `tar` do Windows grava caminhos com `/`; o `Compress-Archive` do PowerShell 5.1 grava `\` e quebra no Mac/Linux). Confira com `unzip -l` e veja se o `manifest.json` do zip tem a versão nova.
+7. **Notas (pt e en):** instalação em 3 passos (baixar, descompactar, "Carregar sem compactação"), depois **todas as modificações desde a última release**: primeiro as visíveis ao usuário (da seção do CHANGELOG), depois "Outras mudanças / Other changes" com as internas (testes, scripts, docs, README). Link para o CHANGELOG no fim.
+8. `gh release create vX.Y.Z <zip> --repo TiuCadu/fofu-watcher --target main --title "vX.Y.Z — título" --notes-file <notas> --latest`. Se o `gh` não estiver no PATH, use `C:\Program Files\GitHub CLI\gh.exe`. Depois, `git fetch --tags` e passe o link da release ao usuário.
