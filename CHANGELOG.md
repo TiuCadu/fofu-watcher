@@ -2,7 +2,7 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
-## [Não lançado]
+## [1.6.4] — Licença GPL-3.0
 ### Alterado
 - Licença trocada de MIT para GPL-3.0-or-later. Quem distribuir uma cópia, modificada ou não, precisa manter a mesma licença e publicar o código. As versões até a 1.6.3 continuam sob MIT.
 
