@@ -2,8 +2,10 @@
   "manifest_version": 3,
   "default_locale": "pt_BR",
   "name": "__MSG_extName__",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "description": "__MSG_extDescription__",
+  "author": "Carlos Oliveira",
+  "homepage_url": "https://github.com/TiuCadu/fofu-watcher",
   "minimum_chrome_version": "116",
   "permissions": [
     "storage",

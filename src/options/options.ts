@@ -466,10 +466,15 @@ $('btn-grant').addEventListener('click', async () => {
   if (ok) void chrome.runtime.sendMessage({ type: 'checkDue' });
 });
 
+function renderAbout(): void {
+  $('about-version').textContent = t('aboutVersion', { version: chrome.runtime.getManifest().version });
+}
+
 async function refreshI18n(): Promise<void> {
   const prev = I;
   I = await loadI18n();
   applyI18n(I);
+  renderAbout();
   if (prev && prev.lang === I.lang && prev.hour12 === I.hour12) return;
   remountPickers();
   renderDays();
@@ -499,6 +504,7 @@ chrome.storage.onChanged.addListener((c, area) => {
 void (async () => {
   I = await loadI18n();
   applyI18n(I);
+  renderAbout();
   const s = await getSettings();
   for (const [id, v] of [['f-time', '09:00'], ['f-ws', '08:00'], ['f-we', '20:00'], ['s-dnd-start', s.dndStart], ['s-dnd-end', s.dndEnd]] as const) mountPicker(id, v);
   renderDays([]);

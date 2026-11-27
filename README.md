@@ -174,3 +174,5 @@ Nada é coletado: tudo fica no seu navegador e a extensão só acessa os sites q
 ## Licença
 
 Copyright (C) 2026 Carlos Oliveira. [GPL-3.0-or-later](LICENSE): pode usar, copiar, modificar e distribuir, mas quem distribuir uma versão (modificada ou não) precisa mantê-la sob a mesma licença e publicar o código-fonte. Até a versão 1.6.3 o projeto era MIT.
+
+Criado por [Carlos Oliveira](https://github.com/TiuCadu). O crédito também aparece em **Opções → Configurações → Sobre**, com a versão instalada e os links do código-fonte e da licença.

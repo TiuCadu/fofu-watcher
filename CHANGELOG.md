@@ -2,6 +2,11 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [1.7.0] — Créditos do autor
+### Adicionado
+- Seção **Sobre** em Opções → Configurações: versão instalada, "Criado por Carlos Oliveira" com link, código-fonte e licença.
+- `author` e `homepage_url` no `manifest.json` (o link "Site da extensão" em `chrome://extensions` aponta para o GitHub); `author`, `homepage` e `repository` no `package.json`.
+
 ## [1.6.4] — Licença GPL-3.0
 ### Alterado
 - Licença trocada de MIT para GPL-3.0-or-later. Quem distribuir uma cópia, modificada ou não, precisa manter a mesma licença e publicar o código. As versões até a 1.6.3 continuam sob MIT.

@@ -502,5 +502,20 @@
   },
   "saving": {
     "message": "Salvando…"
+  },
+  "aboutTitle": {
+    "message": "Sobre"
+  },
+  "aboutVersion": {
+    "message": "Versão {version}"
+  },
+  "aboutCreatedBy": {
+    "message": "Criado por"
+  },
+  "aboutSource": {
+    "message": "Código-fonte no GitHub"
+  },
+  "aboutLicense": {
+    "message": "Licença GPL-3.0-or-later"
   }
 }

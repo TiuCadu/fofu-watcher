@@ -174,3 +174,5 @@ Nothing is collected: everything stays in your browser and the extension only ac
 ## License
 
 Copyright (C) 2026 Carlos Oliveira. [GPL-3.0-or-later](LICENSE): you may use, copy, modify and distribute it, but anyone who distributes a version (modified or not) must keep it under the same license and publish the source code. Up to version 1.6.3 the project was MIT.
+
+Created by [Carlos Oliveira](https://github.com/TiuCadu). The credit also shows under **Options → Settings → About**, with the installed version and links to the source code and the license.
