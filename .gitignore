@@ -1,3 +1,5 @@
 node_modules/
 dist/
 .llm/
+# Cópias em JPG das imagens da loja (feitas à mão; os PNGs em store/images/ são a fonte)
+store/images/jpg/
