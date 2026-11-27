@@ -2,9 +2,12 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
-## [Não lançado]
+## [1.7.1] — Link da Chrome Web Store
 ### Adicionado
 - Link para a página da extensão na Chrome Web Store na seção **Sobre** (Opções → Configurações) e no início dos READMEs.
+### Interno
+- Link da loja publicada em `store/listing.md`.
+- `store/images/jpg/` (cópias em JPG das imagens da loja) no `.gitignore`.
 
 ## [1.7.0] — Créditos do autor
 ### Adicionado
