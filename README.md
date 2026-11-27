@@ -5,6 +5,8 @@
 Extensão (Manifest V3) para **Google Chrome e Brave** que monitora sites e avisa quando o conteúdo muda.
 Tudo roda localmente: sem servidor externo, sem telemetria.
 
+**Instale pela [Chrome Web Store](https://chromewebstore.google.com/detail/fofu-watcher/goobnmihafiiacljjjigngnkfbpfljcp)** (vale também para o Brave). Para compilar a partir do código, veja a instalação em modo desenvolvedor abaixo.
+
 <p align="center">
   <img src="docs/screenshots/popup-pt.png" alt="Popup com os sites monitorados e o status de cada um" width="300">
   <img src="docs/screenshots/history-pt.png" alt="Histórico de mudanças com as linhas removidas e adicionadas" width="520">
@@ -175,4 +177,4 @@ Nada é coletado: tudo fica no seu navegador e a extensão só acessa os sites q
 
 Copyright (C) 2026 Carlos Oliveira. [GPL-3.0-or-later](LICENSE): pode usar, copiar, modificar e distribuir, mas quem distribuir uma versão (modificada ou não) precisa mantê-la sob a mesma licença e publicar o código-fonte. Até a versão 1.6.3 o projeto era MIT.
 
-Criado por [Carlos Oliveira](https://github.com/TiuCadu). O crédito também aparece em **Opções → Configurações → Sobre**, com a versão instalada e os links do código-fonte e da licença.
+Criado por [Carlos Oliveira](https://github.com/TiuCadu). O crédito também aparece em **Opções → Configurações → Sobre**, com a versão instalada e os links da Chrome Web Store, do código-fonte e da licença.

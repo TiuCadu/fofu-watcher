@@ -2,6 +2,10 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [Não lançado]
+### Adicionado
+- Link para a página da extensão na Chrome Web Store na seção **Sobre** (Opções → Configurações) e no início dos READMEs.
+
 ## [1.7.0] — Créditos do autor
 ### Adicionado
 - Seção **Sobre** em Opções → Configurações: versão instalada, "Criado por Carlos Oliveira" com link, código-fonte e licença.

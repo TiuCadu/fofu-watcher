@@ -5,6 +5,8 @@
 A Manifest V3 extension for **Google Chrome and Brave** that monitors websites and notifies you when their content changes.
 Everything runs locally: no external server, no telemetry.
 
+**Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/fofu-watcher/goobnmihafiiacljjjigngnkfbpfljcp)** (works for Brave too). To build from source, see the developer-mode installation below.
+
 <p align="center">
   <img src="docs/screenshots/popup-en.png" alt="Popup with the monitored sites and the status of each one" width="300">
   <img src="docs/screenshots/history-en.png" alt="Change history with the removed and added lines" width="520">
@@ -175,4 +177,4 @@ Nothing is collected: everything stays in your browser and the extension only ac
 
 Copyright (C) 2026 Carlos Oliveira. [GPL-3.0-or-later](LICENSE): you may use, copy, modify and distribute it, but anyone who distributes a version (modified or not) must keep it under the same license and publish the source code. Up to version 1.6.3 the project was MIT.
 
-Created by [Carlos Oliveira](https://github.com/TiuCadu). The credit also shows under **Options → Settings → About**, with the installed version and links to the source code and the license.
+Created by [Carlos Oliveira](https://github.com/TiuCadu). The credit also shows under **Options → Settings → About**, with the installed version and links to the Chrome Web Store, the source code and the license.

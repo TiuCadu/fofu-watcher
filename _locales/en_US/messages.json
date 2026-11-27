@@ -517,5 +517,8 @@
   },
   "aboutLicense": {
     "message": "GPL-3.0-or-later license"
+  },
+  "aboutStore": {
+    "message": "Chrome Web Store page"
   }
 }

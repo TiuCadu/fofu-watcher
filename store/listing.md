@@ -3,7 +3,7 @@
 Tudo o que as lojas pedem, pronto para copiar e colar. Imagens em `store/images/` (refazer com `npm run store-images`).
 O pacote enviado é o zip da release do GitHub (o conteúdo de `dist/`).
 
-- **Chrome Web Store:** https://chrome.google.com/webstore/devconsole (taxa única de US$ 5; vale também para o Brave)
+- **Chrome Web Store:** https://chrome.google.com/webstore/devconsole (taxa única de US$ 5; vale também para o Brave) · publicada em https://chromewebstore.google.com/detail/fofu-watcher/goobnmihafiiacljjjigngnkfbpfljcp
 - **Microsoft Edge Add-ons:** https://partner.microsoft.com/dashboard/microsoftedge (gratuito)
 
 ## Dados gerais
