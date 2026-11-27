@@ -2,6 +2,10 @@
 
 Toda alteração é validada com `npm run check`. Bugs corrigidos citam o teste que os cobre.
 
+## [Não lançado]
+### Alterado
+- Licença trocada de MIT para GPL-3.0-or-later. Quem distribuir uma cópia, modificada ou não, precisa manter a mesma licença e publicar o código. As versões até a 1.6.3 continuam sob MIT.
+
 ## [1.6.3] — Pronta para as lojas
 ### Alterado
 - A descrição da extensão em português (exibida pelo navegador e pelas lojas) ficou igual à em inglês: "Monitora sites e avisa quando o conteúdo mudar. Tudo local, sem telemetria."

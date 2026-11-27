@@ -173,4 +173,4 @@ Nada é coletado: tudo fica no seu navegador e a extensão só acessa os sites q
 
 ## Licença
 
-[MIT](LICENSE): pode usar, copiar, modificar e distribuir à vontade, mantendo o aviso de copyright.
+Copyright (C) 2026 Carlos Oliveira. [GPL-3.0-or-later](LICENSE): pode usar, copiar, modificar e distribuir, mas quem distribuir uma versão (modificada ou não) precisa mantê-la sob a mesma licença e publicar o código-fonte. Até a versão 1.6.3 o projeto era MIT.

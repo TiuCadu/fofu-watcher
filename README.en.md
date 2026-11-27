@@ -173,4 +173,4 @@ Nothing is collected: everything stays in your browser and the extension only ac
 
 ## License
 
-[MIT](LICENSE): free to use, copy, modify and distribute, as long as the copyright notice is kept.
+Copyright (C) 2026 Carlos Oliveira. [GPL-3.0-or-later](LICENSE): you may use, copy, modify and distribute it, but anyone who distributes a version (modified or not) must keep it under the same license and publish the source code. Up to version 1.6.3 the project was MIT.

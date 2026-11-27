@@ -44,7 +44,7 @@ Fofu Watcher vigia os sites que você escolher e avisa quando o conteúdo muda: 
 
 Privacidade em primeiro lugar: tudo roda no seu navegador. Não há servidor, conta, anúncios nem telemetria. A extensão só acessa os sites que você adicionou, e o acesso a cada um é pedido a você ao salvar.
 
-Código aberto (licença MIT): https://github.com/TiuCadu/fofu-watcher
+Código aberto (licença GPL-3.0): https://github.com/TiuCadu/fofu-watcher
 ```
 
 **Termos de busca** (Edge, até 7): `monitor de sites` · `alerta de mudança` · `monitorar preço` · `aviso de alteração` · `vigiar página` · `notificação de site` · `diff`
@@ -67,7 +67,7 @@ Fofu Watcher watches the websites you choose and notifies you when their content
 
 Privacy first: everything runs in your browser. No server, account, ads or telemetry. The extension only accesses the sites you added, and access to each one is requested from you when saving.
 
-Open source (MIT license): https://github.com/TiuCadu/fofu-watcher
+Open source (GPL-3.0 license): https://github.com/TiuCadu/fofu-watcher
 ```
 
 **Search terms** (Edge, up to 7): `website monitor` · `change detection` · `price tracker` · `page change alert` · `web page watcher` · `site notification` · `diff`
